@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{% if archive_category %}{{ archive_category }} 아카이브{% elif archive_year %}{{ archive_year }}년 아카이브{% else %}전체 아카이브{% endif %} — 한돈투데이
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/archive.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+  {% comment %}사이드바 — 필터{% endcomment %}
+  <aside class="sidebar">
+    <div class="crumb">
+      <a href="{% url 'articles:home' %}">홈</a> / 아카이브
+    </div>
+    
+    <h1 class="page-title">
+      {% if archive_category %}
+        {{ archive_category }}<em>.</em>
+      {% elif archive_year %}
+        {{ archive_year }}<em>.</em>
+      {% else %}
+        전체<em>.</em>
+      {% endif %}
+    </h1>
+    
+    <div class="total">TOTAL {{ articles.count }} ARTICLES</div>
+    
+    {# 카테고리 필터 #}
+    <div class="filter-group">
+      <div class="filter-label">카테고리</div>
+      <a href="{% url 'articles:archive' %}" 
+         class="filter-item {% if not archive_category %}active{% endif %}">
+        <div class="left-half">
+          <div class="dot all"></div>
+          <span>전체</span>
+        </div>
+        <span class="count">{{ domestic_count|add:global_count }}</span>
+      </a>
+      <a href="{% url 'articles:archive' category='국내' %}"
+         class="filter-item {% if archive_category == '국내' %}active{% endif %}">
+        <div class="left-half">
+          <div class="dot domestic"></div>
+          <span>국내</span>
+        </div>
+        <span class="count">{{ domestic_count }}</span>
+      </a>
+      <a href="{% url 'articles:archive' category='글로벌' %}"
+         class="filter-item {% if archive_category == '글로벌' %}active{% endif %}">
+        <div class="left-half">
+          <div class="dot global"></div>
+          <span>글로벌</span>
+        </div>
+        <span class="count">{{ global_count }}</span>
+      </a>
+    </div>
+    
+    {# 기간 필터 (available_dates 사용) #}
+    {% if available_dates %}
+    <div class="filter-group">
+      <div class="filter-label">기간</div>
+      {% for date in available_dates %}
+      {% with year=date.year %}
+      {% if forloop.first or year != prev_year %}
+      <a href="{% url 'articles:archive' year=year %}"
+         class="filter-item {% if archive_year == year %}active{% endif %}">
+        <div class="left-half">
+          <span>{{ year }}년</span>
+        </div>
+        <span class="count">{% with count=available_dates|length %}{{ count }}{% endwith %}</span>
+      </a>
+      {% endif %}
+      {% endwith %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </aside>
+  
+  {% comment %}메인 — 타임라인{% endcomment %}
+  <main class="content">
+    
+    {# 검색 및 정렬 컨트롤 #}
+    <div class="control-bar">
+      <div class="search-box">
+        <span class="icon">🔍</span>
+        <input type="text" placeholder="기사 검색..." id="search-input">
+        <span class="shortcut">⌘K</span>
+      </div>
+      <div class="sort-tabs">
+        <button class="active">최신순</button>
+        <button>인기순</button>
+      </div>
+    </div>
+    
+    {# 결과 메타 #}
+    <div class="result-meta">
+      <div>
+        검색 결과 <strong>{{ articles.count }}건</strong>
+        {% if archive_category %}
+        <span class="active-filter">
+          {{ archive_category }}
+          <span class="x" onclick="location.href='{% url 'articles:archive' %}'">×</span>
+        </span>
+        {% endif %}
+      </div>
+      {% if is_paginated %}
+      <div>
+        {{ page_obj.start_index }}–{{ page_obj.end_index }} / {{ page_obj.paginator.count }}
+      </div>
+      {% endif %}
+    </div>
+    
+    {# 타임라인 #}
+    <div class="timeline">
+      {% regroup articles by published_at|date:"Y-m-d" as date_groups %}
+      
+      {% for date_group in date_groups %}
+      <div class="date-group">
+        {# 날짜 라벨 #}
+        <div class="date-label">
+          <div class="day">
+            {{ date_group.grouper|date:"d" }}<em>.</em>
+          </div>
+          <div class="month">{{ date_group.grouper|date:"M Y" }}</div>
+          <div class="weekday">{{ date_group.grouper|date:"l" }}</div>
+          <div class="article-count">{{ date_group.list|length }} articles</div>
+        </div>
+        
+        {# 타임라인 아이템 #}
+        <div class="timeline-items">
+          {% for article in date_group.list %}
+          <a href="{{ article.get_absolute_url }}" class="timeline-item">
+            <div class="item-header">
+              <div class="item-meta">
+                {% if article.category == '국내' %}
+                <span class="cat-pill domestic">국내</span>
+                {% elif article.category == '글로벌' %}
+                <span class="cat-pill global">글로벌</span>
+                {% endif %}
+                <span class="time">{{ article.published_at|date:"H:i" }}</span>
+              </div>
+              {% if article.is_hot %}
+              <span class="badge hot">🔥 HOT</span>
+              {% elif article.is_featured %}
+              <span class="badge featured">★</span>
+              {% endif %}
+            </div>
+            
+            <h3 class="item-title">{{ article.title|striptags }}</h3>
+            
+            {% if article.deck %}
+            <p class="item-deck">{{ article.deck|striptags|truncatewords:25 }}</p>
+            {% endif %}
+            
+            <div class="item-footer">
+              <div class="stats">
+                <span>{{ article.read_minutes }}분</span>
+                <span class="dot"></span>
+                <span>조회 {{ article.view_count }}</span>
+              </div>
+              <div class="arrow">→</div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <p>아직 발행된 기사가 없습니다.</p>
+      </div>
+      {% endfor %}
+    </div>
+    
+    {# 페이지네이션 #}
+    {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if archive_category %}&cat={{ archive_category }}{% endif %}" 
+         class="page-btn">← 이전</a>
+      {% endif %}
+      
+      <span class="page-info">
+        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span>
+      
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if archive_category %}&cat={{ archive_category }}{% endif %}" 
+         class="page-btn">다음 →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+  </main>
+</div>
+
+{% comment %}JavaScript — 검색{% endcomment %}
+<script>
+// 간단한 검색 필터링 (클라이언트 사이드)
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+  searchInput.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('.timeline-item');
+    
+    items.forEach(item => {
+      const title = item.querySelector('.item-title').textContent.toLowerCase();
+      const deck = item.querySelector('.item-deck')?.textContent.toLowerCase() || '';
+      
+      if (title.includes(query) || deck.includes(query)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+}
+
+// ⌘K 단축키
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    searchInput?.focus();
+  }
+});
+</script>
+
+{% endblock %}

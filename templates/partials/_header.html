@@ -1,0 +1,46 @@
+{% load static %}
+{% comment %}
+============================================================
+다크 헤더 — 모든 페이지 공통
+- 로고는 시안 2 (활자 워드마크)
+- 네비 active 클래스는 view에서 컨텍스트로 전달 (active_nav 변수)
+- request.resolver_match.url_name으로 자동 active 처리 가능
+============================================================
+{% endcomment %}
+<header class="top">
+  <div class="top-inner">
+    {# 로고 — 좌측 메타 라벨 + Handon Today. #}
+    <a href="{% url 'articles:home' %}" class="logo" aria-label="한돈투데이 홈으로">
+      <div class="logo-meta">
+        <div class="rule"></div>
+        <div class="meta-line">SEOUL · KOREA</div>
+        <div class="meta-line accent">EST.2026</div>
+      </div>
+      <span class="logo-text">Handon<em>Today.</em></span>
+    </a>
+    {# 메인 네비 #}
+    <nav class="top-nav" aria-label="주요 메뉴">
+      <a href="{% url 'articles:home' %}"
+         class="{% if active_nav == 'home' %}active{% endif %}">메인</a>
+      <a href="{% url 'articles:archive' %}"
+         class="{% if active_nav == 'archive' %}active{% endif %}">아카이브</a>
+      <a href="{% url 'articles:home' %}?cat=국내"
+         class="{% if active_nav == 'domestic' %}active{% endif %}">국내</a>
+      <a href="{% url 'articles:home' %}?cat=글로벌"
+         class="{% if active_nav == 'global' %}active{% endif %}">글로벌</a>
+      <a href="{% url 'articles:home' %}?cat=market"
+         class="{% if active_nav == 'market' %}active{% endif %}">시장·돈가</a>
+      <a href="{% url 'articles:home' %}?cat=policy"
+         class="{% if active_nav == 'policy' %}active{% endif %}">정책</a>
+    </nav>
+    {# 우측 CTA #}
+    <div class="top-cta">
+      <button class="top-search" aria-label="검색" type="button">⌕</button>
+      {% if user.is_authenticated %}
+        <a href="{% url 'articles:logout' %}" class="btn-light btn">로그아웃</a>
+      {% else %}
+        <a href="{% url 'articles:login' %}" class="btn-light btn">로그인</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

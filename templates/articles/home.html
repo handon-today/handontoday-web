@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}한돈투데이 · Handon Today{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width:1400px; margin:0 auto; padding:40px 20px;">
+  
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+    <h1 style="font-family:'Instrument Serif',serif; font-size:42px; font-style:italic;">최신 기사</h1>
+    
+    <div class="filter-buttons" style="display:flex; gap:12px;">
+      <a href="{% url 'articles:home' %}" 
+         class="filter-btn {% if not request.GET.cat %}active{% endif %}"
+         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
+        전체
+      </a>
+      <a href="?cat=국내" 
+         class="filter-btn {% if request.GET.cat == '국내' %}active{% endif %}"
+         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
+        국내
+      </a>
+      <a href="?cat=글로벌" 
+         class="filter-btn {% if request.GET.cat == '글로벌' %}active{% endif %}"
+         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
+        글로벌
+      </a>
+    </div>
+  </div>
+
+  <div class="articles-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:32px;">
+    {% for article in articles %}
+    <article class="article-card" style="border-bottom:1px solid var(--line); padding-bottom:20px;">
+      <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; 
+                     {% if article.category == '국내' %}color:#c0392b;{% else %}color:#2980b9;{% endif %}">
+          {{ article.category }}
+        </span>
+        <span style="color:var(--muted); font-size:11px;">•</span>
+        <span style="font-size:11px; color:var(--muted);">{{ article.published_at|date:"m.d" }}</span>
+      </div>
+      
+      <h2 style="font-family:'Instrument Serif',serif; font-size:20px; margin-bottom:10px; line-height:1.3;">
+        <a href="{% url 'articles:detail' article.id article.slug %}" 
+           style="color:var(--ink); text-decoration:none;">
+          {{ article.title }}
+        </a>
+      </h2>
+      
+      <p style="color:var(--ink-soft); font-size:13px; line-height:1.5;">
+        {{ article.deck|default:article.body|striptags|truncatewords:15 }}
+      </p>
+      
+      <div style="margin-top:12px; font-size:11px; color:var(--muted); display:flex; gap:12px;">
+        <span>{{ article.read_minutes }}분</span>
+        <span>•</span>
+        <span>조회 {{ article.view_count }}</span>
+      </div>
+    </article>
+    {% empty %}
+    <p style="grid-column:1/-1; text-align:center; color:var(--muted); padding:60px 0;">
+      기사가 없습니다.
+    </p>
+    {% endfor %}
+  </div>
+
+  <!-- 페이지네이션 -->
+  {% if is_paginated %}
+  <div style="display:flex; justify-content:center; gap:8px; margin-top:48px; padding-bottom:48px;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}"
+       style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px;">
+      ← 이전
+    </a>
+    {% endif %}
+    <span style="padding:8px 16px; font-size:14px; color:var(--muted);">
+      {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}"
+       style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px;">
+      다음 →
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- 통계 바 (footer 바로 위) -->
+<div class="stats-strip">
+  <div class="container" style="max-width:1400px; margin:0 auto; padding:0 20px;">
+    <div class="stats-grid">
+      <div class="stat">
+        <span class="stat-value">{{ korea_count }}<small style="font-size:0.6em; margin-left:4px;">건</small></span>
+        <span class="stat-label">국내 기사</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ global_count }}<small style="font-size:0.6em; margin-left:4px;">건</small></span>
+        <span class="stat-label">글로벌 기사</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">0<small style="font-size:0.6em; margin-left:4px;">건</small></span>
+        <span class="stat-label">특집 기사</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ total_views|default:"0" }}<small style="font-size:0.6em; margin-left:4px;">회</small></span>
+        <span class="stat-label">총 방문</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.filter-btn.active {
+  border-color: var(--accent);
+  border-width: 2px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.filter-btn:hover {
+  border-color: var(--ink);
+}
+</style>
+{% endblock %}

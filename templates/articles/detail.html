@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ article.title|striptags }} — 팜스링크{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="progress">
+  <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<div class="breadcrumb">
+  <a href="{% url 'articles:home' %}">홈</a>
+  <span class="sep">/</span>
+  {% if article.category == '국내' %}
+  <a href="{% url 'articles:home' %}?cat=국내">국내</a>
+  {% elif article.category == '글로벌' %}
+  <a href="{% url 'articles:home' %}?cat=글로벌">글로벌</a>
+  {% endif %}
+  <span class="sep">/</span>
+  <span>{{ article.title|striptags|truncatewords:8 }}</span>
+</div>
+
+<article class="article-page">
+  <header class="article-header">
+    <div class="cat-line">
+      {% if article.category == '국내' %}
+      <span class="cat-pill domestic">국내</span>
+      {% elif article.category == '글로벌' %}
+      <span class="cat-pill global">🌍 글로벌</span>
+      {% endif %}
+      {% if article.is_hot %}
+      <span class="live-dot">HOT</span>
+      {% endif %}
+    </div>
+    
+    <h1 class="article-title">{{ article.title|striptags }}</h1>
+    
+    {% if article.deck %}
+    <div class="article-deck">{{ article.deck|striptags }}</div>
+    {% endif %}
+    
+    <div class="article-meta">
+      <div>
+        <span class="label">발행</span>
+        <span>{{ article.published_at|date:"Y년 m월 d일 H:i" }}</span>
+      </div>
+      <div>
+        <span class="label">분량</span>
+        <span>{{ article.read_minutes }}분</span>
+      </div>
+      <div>
+        <span class="label">조회</span>
+        <span>{{ article.view_count }}</span>
+      </div>
+      <div class="share">
+        <button aria-label="링크 복사" onclick="copyLink()">🔗</button>
+        <button aria-label="트위터 공유" onclick="shareTwitter()">𝕏</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero-visual">
+    {% if article.image_url %}
+      {# Unsplash 이미지 #}
+      <img src="{{ article.image_url }}" alt="{{ article.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+    {% else %}
+      {# 폴백: 이모지 #}
+      <div class="hero-visual-inner">
+        {% if '🐷' in article.title or '🐖' in article.title %}
+        <span class="emoji">🐷</span>
+        {% elif '🌍' in article.title or '🌎' in article.title %}
+        <span class="emoji">🌍</span>
+        {% elif '📊' in article.title or '📈' in article.title %}
+        <span class="emoji">📊</span>
+        {% elif '💰' in article.title or '💵' in article.title %}
+        <span class="emoji">💰</span>
+        {% elif '🎯' in article.title %}
+        <span class="emoji">🎯</span>
+        {% elif '🔬' in article.title %}
+        <span class="emoji">🔬</span>
+        {% else %}
+        <span class="emoji">📰</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="article-body">
+    {{ article.body_html|safe }}
+  </div>
+
+  {% if related_articles %}
+  <aside class="related-section">
+    <div class="container-narrow">
+      <h3 class="related-head">이 기사도 읽어보세요</h3>
+      <div class="related-grid">
+        {% for rel in related_articles %}
+        <a href="{{ rel.get_absolute_url }}" class="related-card">
+          <div class="related-meta">
+            {% if rel.category == '국내' %}
+            <span class="cat-pill domestic">국내</span>
+            {% elif rel.category == '글로벌' %}
+            <span class="cat-pill global">글로벌</span>
+            {% endif %}
+            <span class="related-date">{{ rel.published_at|date:"m.d" }}</span>
+          </div>
+          <h4>{{ rel.title|striptags }}</h4>
+          {% if rel.deck %}
+          <p>{{ rel.deck|striptags|truncatewords:15 }}</p>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+  {% endif %}
+</article>
+
+<script>
+// 스크롤 진행 바
+window.addEventListener('scroll', function() {
+  const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrolled = (winScroll / height) * 100;
+  document.getElementById('progress-bar').style.width = scrolled + '%';
+});
+
+// 링크 복사
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('링크가 복사되었습니다!');
+  });
+}
+
+// 트위터 공유
+function shareTwitter() {
+  const title = encodeURIComponent('{{ article.title|striptags|escapejs }}');
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=550,height=420');
+}
+</script>
+
+{% endblock %}

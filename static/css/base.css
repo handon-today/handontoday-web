@@ -1,0 +1,466 @@
+/* ============================================================
+   한돈투데이 · base.css
+   ============================================================
+   tokens.css 다음으로 로드.
+   모든 페이지가 공유하는 스타일:
+   - reset / 기본 타이포
+   - 다크 헤더 (`.top`)
+   - BREAKING 티커 (`.ticker`)
+   - 푸터 (`footer`)
+   - 공통 컴포넌트 (카테고리 칩, 배지, 버튼 등)
+   페이지별 고유 스타일은 home.css / detail.css / archive.css에서.
+============================================================ */
+
+/* ─── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+img, svg { display: block; max-width: 100%; }
+
+/* ─── 시각적 헬퍼 ─────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================
+   다크 헤더 (.top)
+============================================================ */
+.top {
+  background: var(--ink);
+  color: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+}
+.top-inner {
+  max-width: var(--container-max-wide);
+  margin: 0 auto;
+  padding: 16px var(--container-pad-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+/* 로고 — 활자 워드마크 (시안 2 확정) */
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  position: relative;
+}
+.logo-meta {
+  display: flex;
+  flex-direction: column;
+  padding-right: 14px;
+  border-right: 1px solid #2a2a2e;
+  margin-right: 14px;
+  align-self: stretch;
+  justify-content: center;
+}
+.logo-meta .rule {
+  width: 28px;
+  height: 1.5px;
+  background: var(--warm);
+  margin-bottom: 4px;
+}
+.logo-meta .meta-line {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.logo-meta .meta-line.accent { color: var(--warm); }
+.logo-text {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  color: var(--bg);
+}
+.logo-text em {
+  font-style: italic;
+  color: var(--warm);
+  margin-left: 2px;
+}
+
+/* 메인 네비 */
+.top-nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+.top-nav a {
+  color: #c9c9d1;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  transition: all var(--t-fast);
+}
+.top-nav a:hover {
+  background: var(--ink-2);
+  color: #fff;
+}
+.top-nav a.active {
+  color: var(--bg);
+  border-bottom: 1px solid var(--warm);
+  border-radius: 0;
+  padding-bottom: 7px;
+}
+.top-nav a.live { color: var(--warm); }
+.top-nav a.live::before {
+  content: "● ";
+  color: var(--accent);
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+
+/* 우측 CTA */
+.top-cta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.top-search {
+  color: #c9c9d1;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+}
+.top-cta .btn-light {
+  background: var(--bg);
+  color: var(--ink);
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   BREAKING 티커 (.ticker)
+============================================================ */
+.ticker {
+  background: var(--ink-2);
+  color: var(--bg);
+  overflow: hidden;
+  border-top: 1px solid #2a2a2e;
+}
+.ticker-inner {
+  max-width: var(--container-max-wide);
+  margin: 0 auto;
+  padding: 10px var(--container-pad-x);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+.ticker-label {
+  background: var(--accent);
+  color: #fff;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.ticker-content {
+  color: #c9c9d1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ticker-content strong { color: var(--bg); }
+.ticker-content .sep { color: #4a4a52; margin: 0 12px; }
+
+/* ============================================================
+   푸터
+============================================================ */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: var(--space-3xl) var(--container-pad-x) var(--space-xl);
+  background: var(--paper);
+  margin-top: var(--space-2xl);
+}
+.footer-inner {
+  max-width: var(--container-max-wide);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+}
+.footer-brand h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.footer-brand h3 em { font-style: italic; color: var(--accent); }
+.footer-brand p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  max-width: 360px;
+  line-height: 1.6;
+}
+.footer-col h5 {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.footer-col a {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  padding: 5px 0;
+}
+.footer-col a:hover { color: var(--accent); }
+.footer-bottom {
+  max-width: var(--container-max-wide);
+  margin: 0 auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   공통 컴포넌트 — 어디서나 사용
+============================================================ */
+
+/* ─── 카테고리 필 (cat-pill) ─────────────────────────────── */
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+}
+.cat-pill.domestic { background: var(--accent-soft); color: var(--cat-domestic); }
+.cat-pill.global { background: #e8eff5; color: var(--cat-global); }
+.cat-pill.market { background: #fcf3e8; color: var(--cat-market); }
+.cat-pill.policy { background: #f0eaf5; color: var(--cat-policy); }
+.cat-pill.tech { background: #e7f0eb; color: var(--cat-tech); }
+
+/* ─── 카테고리 태그 (cat-tag — 모노스페이스) ─────────────── */
+.cat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.cat-tag .tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.cat-tag.domestic { color: var(--cat-domestic); }
+.cat-tag.domestic .tag-dot { background: var(--cat-domestic); }
+.cat-tag.global { color: var(--cat-global); }
+.cat-tag.global .tag-dot { background: var(--cat-global); }
+.cat-tag.market { color: var(--cat-market); }
+.cat-tag.market .tag-dot { background: var(--cat-market); }
+.cat-tag.policy { color: var(--cat-policy); }
+.cat-tag.policy .tag-dot { background: var(--cat-policy); }
+.cat-tag.tech { color: var(--cat-tech); }
+.cat-tag.tech .tag-dot { background: var(--cat-tech); }
+
+/* ─── 배지 ───────────────────────────────────────────────── */
+.badge {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+.badge.hot {
+  background: var(--highlight);
+  color: #92400e;
+}
+.badge.live::before {
+  content: "● ";
+  animation: blink 1.2s infinite;
+}
+
+/* ─── 라이브 점 ──────────────────────────────────────────── */
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.live-dot::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: blink 1.2s infinite;
+}
+
+/* ─── 버튼 (.btn) ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all var(--t-fast);
+}
+.btn-primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn-primary:hover { background: var(--ink-2); }
+.btn-secondary { background: var(--paper); color: var(--ink); border-color: var(--line); }
+.btn-secondary:hover { border-color: var(--ink); }
+.btn-text {
+  background: none;
+  color: var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 0 0 2px 0;
+  border-radius: 0;
+}
+.btn-text:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── 섹션 헤더 (.section-head) ──────────────────────────── */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-lg);
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+.section-head h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 42px;
+  letter-spacing: -0.025em;
+}
+.section-head h2 em {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.section-head .tools {
+  display: flex;
+  gap: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 3px;
+  border-radius: var(--radius-lg);
+}
+.section-head .tools button {
+  background: transparent;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.section-head .tools button.active {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ============================================================
+   반응형 (모바일 공통)
+============================================================ */
+@media (max-width: 980px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+  /* 모바일에서도 메뉴 표시 - 수평 스크롤 가능 */
+}
+@media (max-width: 560px) {
+  /* 모바일 헤더 조정 */
+  .top-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    flex-shrink: 0;
+  }
+  .logo-meta {
+    display: none; /* 모바일에서 메타 라벨 숨김 */
+  }
+  .top-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .top-nav a {
+    white-space: nowrap;
+  }
+  .top-cta {
+    margin-left: auto;
+  }
+  
+  .top-inner,
+  .ticker-inner,
+  .site-footer {
+    padding-left: var(--container-pad-x-mobile);
+    padding-right: var(--container-pad-x-mobile);
+  }
+  .section-head h2 { font-size: 30px; }
+  .footer-bottom { flex-direction: column; gap: 8px; }
+}
+
+/* Hero 이미지 스타일 */
+.hero-visual {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-visual .hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

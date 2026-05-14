@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{% if query %}{{ query }} 검색 결과{% else %}검색{% endif %} - Handon Today
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1200px; margin:0 auto; padding:40px 20px;">
+  
+  <div style="margin-bottom:40px;">
+    <h1 style="font-family:'Instrument Serif',serif; font-size:42px; margin-bottom:16px;">
+      {% if query %}
+        "{{ query }}" 검색 결과
+      {% else %}
+        검색
+      {% endif %}
+    </h1>
+    
+    <form method="get" action="{% url 'articles:search' %}" style="margin-top:24px;">
+      <div style="display:flex; gap:12px; max-width:600px;">
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ query }}"
+          placeholder="기사 제목, 본문 검색..."
+          style="flex:1; padding:14px 18px; border:1px solid var(--line); border-radius:8px; font-size:15px;"
+          autofocus
+        >
+        <button 
+          type="submit"
+          style="padding:14px 28px; background:var(--ink); color:var(--bg); border:none; border-radius:8px; font-weight:600; cursor:pointer;"
+        >
+          검색
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if query %}
+    <p style="color:var(--ink-soft); margin-bottom:32px; font-size:15px;">
+      총 <strong style="color:var(--accent);">{{ result_count }}건</strong>의 검색 결과
+    </p>
+
+    {% if results %}
+      <div style="display:grid; gap:24px;">
+        {% for article in results %}
+        <article style="border-bottom:1px solid var(--line); padding-bottom:24px;">
+          <div style="display:flex; gap:4px; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">
+              {{ article.category }}
+            </span>
+            <span style="color:var(--muted); font-size:11px;">•</span>
+            <span style="font-size:11px; color:var(--muted);">
+              {{ article.published_at|date:"Y.m.d" }}
+            </span>
+          </div>
+          
+          <h2 style="font-family:'Instrument Serif',serif; font-size:24px; margin-bottom:12px;">
+            <a href="{% url 'articles:detail' article.id article.slug %}" 
+               style="color:var(--ink); text-decoration:none;">
+              {{ article.title }}
+            </a>
+          </h2>
+          
+          <p style="color:var(--ink-soft); font-size:14px; line-height:1.6;">
+            {{ article.body|truncatewords:40|striptags }}
+          </p>
+        </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align:center; padding:80px 20px; color:var(--muted);">
+        <p style="font-size:18px; margin-bottom:12px;">🔍</p>
+        <p style="font-size:15px;">검색 결과가 없습니다.</p>
+        <p style="font-size:13px; margin-top:8px;">다른 검색어로 시도해보세요.</p>
+      </div>
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}
