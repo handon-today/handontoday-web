@@ -90,9 +90,10 @@
         <input type="text" placeholder="기사 검색..." id="search-input">
         <span class="shortcut">⌘K</span>
       </div>
-      <div class="sort-tabs">
-        <button class="active">최신순</button>
-        <button>인기순</button>
+      <div style="display:inline-flex; border:1px solid #ddd; border-radius:20px; overflow:hidden; margin-top:8px;">
+        <a href="?sort=latest" style="padding:8px 20px; font-size:13px; text-decoration:none; {% if archive_sort == 'latest' %}background:#0e0e10; color:#fff; font-weight:600;{% else %}background:#fff; color:#888;{% endif %}">최신순</a>
+        <a href="?sort=popular" style="padding:8px 20px; font-size:13px; text-decoration:none; {% if archive_sort == 'popular' %}background:#0e0e10; color:#fff; font-weight:600;{% else %}background:#fff; color:#888;{% endif %}">인기순</a>
+      </div>
       </div>
     </div>
     
@@ -142,6 +143,8 @@
                 <span class="cat-pill global">글로벌</span>
                 {% endif %}
                 <span class="time">{{ article.published_at|date:"H:i" }}</span>
+                <span class="dot"></span>
+                <span>조회 {{ article.view_count }}</span>
               </div>
               {% if article.is_hot %}
               <span class="badge hot">🔥 HOT</span>
@@ -157,11 +160,6 @@
             {% endif %}
             
             <div class="item-footer">
-              <div class="stats">
-                <span>{{ article.read_minutes }}분</span>
-                <span class="dot"></span>
-                <span>조회 {{ article.view_count }}</span>
-              </div>
               <div class="arrow">→</div>
             </div>
           </a>

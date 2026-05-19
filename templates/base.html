@@ -3,51 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   {# ─── SEO ─────────────────────────────────────────────── #}
   <title>{% block title %}한돈투데이 · Handon Today{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}매일 발행되는 양돈 산업 전문 미디어. 국내·해외 양돈 뉴스를 깊이 있게.{% endblock %}">
   <meta name="theme-color" content="#0e0e10">
   <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
-
-  {# Open Graph #}
+  {# ─── Open Graph ──────────────────────────────────────── #}
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}한돈투데이 · Handon Today{% endblock %}">
   <meta property="og:description" content="{% block og_description %}매일 발행되는 양돈 산업 전문 미디어{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="한돈투데이">
-
-  {# ─── Favicon (TODO: 파일 추가되면 활성화) ───────────── #}
-  {# <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}"> #}
-  {# <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}"> #}
-
+  <meta property="og:image" content="{% block og_image %}https://handontoday.com/static/images/og-default.png{% endblock %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  {# ─── Twitter Card ────────────────────────────────────── #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}한돈투데이 · Handon Today{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}매일 발행되는 양돈 산업 전문 미디어{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}https://handontoday.com/static/images/og-default.png{% endblock %}">
   {# ─── 폰트 ───────────────────────────────────────────── #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
   {# ─── CSS — 순서 중요 ────────────────────────────────── #}
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
-
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-
-  {# ─── 다크 헤더 (티커는 페이지별 옵션) ─────────────── #}
   {% include "partials/_header.html" %}
   {% block ticker %}{% endblock %}
-
-  {# ─── 메인 콘텐츠 ────────────────────────────────────── #}
   <main id="main">
     {% block content %}{% endblock %}
   </main>
-
-  {% comment %}푸터{% endcomment %}
   {% include "partials/_footer.html" %}
-
-  {# ─── JS — 페이지별 ──────────────────────────────────── #}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
+    'django.contrib.humanize',
     
     # 외부
     'widget_tweaks',
@@ -157,4 +159,21 @@ LOGOUT_REDIRECT_URL = '/'
 # CSRF 설정 (Cloud Shell 동적 URL)
 CSRF_TRUSTED_ORIGINS = [
     "https://*.cloudshell.dev",  # 모든 Cloud Shell URL 허용
+]
+
+# Cloudflare/Cloud Run 프록시 설정
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Cloud Run 도메인 허용
+ALLOWED_HOSTS += [
+    '*.run.app',
+    'handontoday.com',
+    'www.handontoday.com',
+]
+
+CSRF_TRUSTED_ORIGINS += [
+    'https://*.run.app',
+    'https://handontoday.com',
+    'https://www.handontoday.com',
 ]

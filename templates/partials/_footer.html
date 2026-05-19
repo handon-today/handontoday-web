@@ -2,41 +2,23 @@
 {% comment %}푸터{% endcomment %}
 <footer class="site-footer">
   <div class="footer-inner">
-
     <div class="footer-brand">
       <h3>Handon<em>Today.</em></h3>
       <p>국내와 해외 양돈 매체의 흐름을 매일 정리합니다.<br>농가와 업계가 알아야 할 단 하나의 뉴스레터.</p>
     </div>
-
     <div class="footer-col">
       <h5>섹션</h5>
       <a href="{% url 'articles:home' %}?cat=국내">국내</a>
       <a href="{% url 'articles:home' %}?cat=글로벌">글로벌</a>
-      <a href="{% url 'articles:home' %}?cat=market">시장 · 돈가</a>
-      <a href="{% url 'articles:home' %}?cat=policy">정책</a>
-      <a href="{% url 'articles:home' %}?cat=tech">기술 · 연구</a>
     </div>
-
     <div class="footer-col">
       <h5>회사</h5>
-      <a href="#">소개</a>
-      <a href="#">편집 원칙</a>
-      <a href="#">광고 문의</a>
-      <a href="#">제휴 문의</a>
+      <a href="https://www.farmslink.net/" target="_blank">소개</a>
+      <a href="mailto:business@handontoday.com">광고 · 제휴 문의</a>
     </div>
-
-    <div class="footer-col">
-      <h5>구독</h5>
-      <a href="#" aria-disabled="true">RSS (준비 중)</a>
-      {# 2차에서 뉴스레터·슬랙 알림 활성화 #}
-      <a href="#">뉴스레터 (준비 중)</a>
-      <a href="#">슬랙 알림 (준비 중)</a>
-    </div>
-
   </div>
-
   <div class="footer-bottom">
     <span>© {% now "Y" %} HANDON TODAY · ALL RIGHTS RESERVED</span>
-    <span>SEOUL · KOREA · v1.0</span>
+    <span>SEOUL · KOREA · v2.0</span>
   </div>
 </footer>

@@ -20,6 +20,7 @@ class HomeView(ListView):
     model = Article
     template_name = 'articles/home.html'
     context_object_name = 'articles'
+    paginate_by = 15
     
     def get_queryset(self):
         """카테고리 필터링"""
@@ -52,6 +53,9 @@ class HomeView(ListView):
         context['korea_count'] = Article.objects.filter(publish_status='published', category='국내').count()
         context['global_count'] = Article.objects.filter(publish_status='published', category='글로벌').count()
         context['total_views'] = sum(Article.objects.filter(publish_status='published').values_list('view_count', flat=True))
+        from django.utils import timezone
+        today = timezone.localdate()
+        context['today_views'] = sum(Article.objects.filter(publish_status='published', published_at__date=today).values_list('view_count', flat=True))
         
         return context
 class ArticleDetailView(DetailView):
@@ -103,9 +107,14 @@ class ArchiveView(ListView):
     
     def get_queryset(self):
         """필터링된 기사 목록"""
+        sort = self.request.GET.get('sort', 'latest')
+        if sort == 'popular':
+            order = '-view_count'
+        else:
+            order = '-created_at'
         queryset = Article.objects.filter(
             publish_status='published'
-        ).order_by('-created_at')
+        ).order_by(order)
         
         # 카테고리
         category = self.kwargs.get('category')
@@ -128,6 +137,7 @@ class ArchiveView(ListView):
         context = super().get_context_data(**kwargs)
         
         # 필터 정보
+        context['archive_sort'] = self.request.GET.get('sort', 'latest')
         context['archive_category'] = self.kwargs.get('category')
         context['archive_year'] = self.kwargs.get('year')
         context['archive_month'] = self.kwargs.get('month')

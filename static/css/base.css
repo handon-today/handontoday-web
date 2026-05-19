@@ -207,9 +207,21 @@ img, svg { display: block; max-width: 100%; }
   max-width: var(--container-max-wide);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "brand brand"
+    "section company";
   gap: var(--space-2xl);
   margin-bottom: var(--space-2xl);
+}
+.footer-brand {
+  grid-area: brand;
+}
+.footer-inner .footer-col:nth-child(2) {
+  grid-area: section;
+}
+.footer-inner .footer-col:nth-child(3) {
+  grid-area: company;
 }
 .footer-brand h3 {
   font-family: var(--font-serif);
@@ -415,6 +427,7 @@ img, svg { display: block; max-width: 100%; }
 ============================================================ */
 @media (max-width: 980px) {
   .footer-inner { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: 1 / -1; }
   /* 모바일에서도 메뉴 표시 - 수평 스크롤 가능 */
 }
 @media (max-width: 560px) {

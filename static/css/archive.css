@@ -217,7 +217,7 @@ main.content {
   padding: 3px;
 }
 
-.sort-tabs button {
+.sort-tabs button, .sort-tabs a {
   background: transparent;
   border: none;
   padding: 8px 14px;
@@ -228,13 +228,15 @@ main.content {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.sort-tabs button:hover {
+.sort-tabs button:hover, .sort-tabs a:hover {
   background: var(--line-soft);
 }
 
-.sort-tabs button.active {
+.sort-tabs button.active, .sort-tabs a.active {
   background: var(--ink);
   color: var(--bg);
 }
@@ -529,7 +531,7 @@ main.content {
   .page {
     grid-template-columns: 1fr;
     gap: var(--space-xl);
-    padding: var(--space-xl) var(--space-md);
+    padding: var(--space-xl) 40px;
   }
   
   aside.sidebar {
@@ -577,7 +579,7 @@ main.content {
 /* ─── 반응형 (560px 이하) ─── */
 @media (max-width: 560px) {
   .page {
-    padding: var(--space-lg) var(--space-md);
+    padding: var(--space-lg) 20px;
   }
   
   .control-bar {
@@ -590,7 +592,7 @@ main.content {
     justify-content: space-between;
   }
   
-  .sort-tabs button {
+  .sort-tabs button, .sort-tabs a {
     flex: 1;
   }
   
@@ -605,6 +607,11 @@ main.content {
   
   .timeline-items {
     padding-left: 0;
+    padding-right: 0;
+  }
+  .timeline {
+    padding-left: 24px;
+    padding-right: 24px;
   }
   
   .timeline-item::before {

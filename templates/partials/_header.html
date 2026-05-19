@@ -20,22 +20,12 @@
     </a>
     {# 메인 네비 #}
     <nav class="top-nav" aria-label="주요 메뉴">
-      <a href="{% url 'articles:home' %}"
-         class="{% if active_nav == 'home' %}active{% endif %}">메인</a>
       <a href="{% url 'articles:archive' %}"
          class="{% if active_nav == 'archive' %}active{% endif %}">아카이브</a>
-      <a href="{% url 'articles:home' %}?cat=국내"
-         class="{% if active_nav == 'domestic' %}active{% endif %}">국내</a>
-      <a href="{% url 'articles:home' %}?cat=글로벌"
-         class="{% if active_nav == 'global' %}active{% endif %}">글로벌</a>
-      <a href="{% url 'articles:home' %}?cat=market"
-         class="{% if active_nav == 'market' %}active{% endif %}">시장·돈가</a>
-      <a href="{% url 'articles:home' %}?cat=policy"
-         class="{% if active_nav == 'policy' %}active{% endif %}">정책</a>
+
     </nav>
     {# 우측 CTA #}
     <div class="top-cta">
-      <button class="top-search" aria-label="검색" type="button">⌕</button>
       {% if user.is_authenticated %}
         <a href="{% url 'articles:logout' %}" class="btn-light btn">로그아웃</a>
       {% else %}
