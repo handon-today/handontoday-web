@@ -47,3 +47,8 @@ urlpatterns = [
     # 아카이브 (전체)
     path('archive/', views.ArchiveView.as_view(), name='archive'),
 ]
+
+# Honeypot
+urlpatterns += [
+    path('contact-old/', views.honeypot_view, name='honeypot'),
+]
