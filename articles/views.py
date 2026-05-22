@@ -130,10 +130,6 @@ class ArticleDetailView(DetailView):
         
         article = self.object
         
-        import re
-        match = re.search(r'<blockquote>.*?</blockquote>', article.body_html or '', re.DOTALL)
-        context['summary_html'] = match.group(0) if match else None
-
         # 같은 카테고리 최신 기사 3개
         context['related_articles'] = Article.objects.filter(
             publish_status='published',
