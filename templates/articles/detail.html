@@ -68,6 +68,10 @@
     </div>
   </header>
 
+  {% if summary_html %}
+  <div class="summary-top">{{ summary_html|safe }}</div>
+  {% endif %}
+
   <div class="hero-visual">
     {% if article.image_url %}
       {# Unsplash 이미지 #}
