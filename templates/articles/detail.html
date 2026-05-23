@@ -72,6 +72,7 @@
   <div class="summary-top">{{ summary_html|safe }}</div>
   {% endif %}
 
+  {% if '브리핑' not in article.title %}
   <div class="hero-visual">
     {% if article.image_url %}
       {# Unsplash 이미지 #}
@@ -97,6 +98,7 @@
       </div>
     {% endif %}
   </div>
+  {% endif %}
 
   <div class="article-body">
     {{ article.body_html|safe }}
