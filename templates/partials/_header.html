@@ -19,11 +19,7 @@
       <span class="logo-text">Handon<em>Today.</em></span>
     </a>
     {# 메인 네비 #}
-    <nav class="top-nav" aria-label="주요 메뉴">
-      <a href="{% url 'articles:archive' %}"
-         class="{% if active_nav == 'archive' %}active{% endif %}">아카이브</a>
-
-    </nav>
+    <nav class="top-nav" aria-label="주요 메뉴"></nav>
     {# 우측 CTA #}
     <div class="top-cta">
       {% if user.is_authenticated %}
@@ -31,6 +27,7 @@
       {% else %}
         <a href="{% url 'articles:login' %}" class="btn-light btn">로그인</a>
       {% endif %}
+      <a href="{% url 'articles:archive' %}" class="btn-archive btn">아카이브</a>
     </div>
   </div>
 </header>

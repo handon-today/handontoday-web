@@ -106,6 +106,9 @@ img, svg { display: block; max-width: 100%; }
   flex: 1;
   justify-content: center;
 }
+.top-nav:empty {
+  display: none;
+}
 .top-nav a {
   color: #c9c9d1;
   font-size: 13px;
@@ -154,6 +157,19 @@ img, svg { display: block; max-width: 100%; }
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+}
+.top-cta .btn-archive {
+  background: transparent;
+  color: var(--warm);
+  border: 1px solid var(--warm);
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+.top-cta .btn-archive:hover {
+  background: var(--warm);
+  color: var(--ink);
 }
 
 /* ============================================================
