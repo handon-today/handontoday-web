@@ -52,7 +52,7 @@
 .article-header {
   max-width: 880px;
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-xl);
+  padding: var(--space-xl) var(--space-xl) var(--space-lg);
 }
 
 .article-header .cat-line {
@@ -83,8 +83,8 @@
   color: var(--ink-2);
   font-weight: 300;
   letter-spacing: -0.005em;
-  margin-bottom: var(--space-2xl);
-  padding-bottom: var(--space-2xl);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -495,8 +495,10 @@
 }
 
 .summary-top {
-  margin:  0;
-  6ackground: #fdf6ec;
+  max-width: 720px;
+  margin: 0 auto var(--space-lg);
+  padding: 16px 20px;
+  background: #fdf6ec;
   border-left: 3px solid #c0392b;
   border-radius: 4px;
 }
@@ -505,5 +507,5 @@
   padding: 0;
   font-size: 15px;
   line-height: 1.6;
-  color: var(--color-text-primary, #1a1a1a);
+  color: var(--ink);
 }
