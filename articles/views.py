@@ -7,6 +7,8 @@
 
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django import forms
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import logout
 from django.shortcuts import redirect
@@ -14,6 +16,32 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponsePermanentRedirect
 from django.db.models import Q
 from .models import Article
+
+
+class EmailSignupForm(UserCreationForm):
+    """이메일 기반 회원가입 폼"""
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'placeholder': 'name@example.com'})
+    )
+
+    class Meta:
+        model = User
+        fields = ('email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = self.cleaned_data['email']  # username = email
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+        return user
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(username=email).exists():
+            raise forms.ValidationError('이미 사용 중인 이메일입니다.')
+        return email
 
 
 class HomeView(ListView):
@@ -216,7 +244,7 @@ class ArchiveView(ListView):
 
 class SignupView(CreateView):
     """회원가입"""
-    form_class = UserCreationForm
+    form_class = EmailSignupForm
     template_name = 'articles/signup.html'
     success_url = reverse_lazy('articles:login')
     
