@@ -31,7 +31,12 @@ class HomeView(ListView):
         category = self.request.GET.get('cat')
         if category:
             queryset = queryset.filter(category=category)
-        
+
+        # 브리핑 필터 (?type=briefing)
+        type_filter = self.request.GET.get('type')
+        if type_filter == 'briefing':
+            queryset = queryset.filter(title__startswith='🐷 한돈투데이 모닝 브리핑')
+
         return queryset
     
     def get_context_data(self, **kwargs):
