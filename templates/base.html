@@ -7,7 +7,7 @@
   <title>{% block title %}한돈투데이 · Handon Today{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}매일 발행되는 양돈 산업 전문 미디어. 국내·해외 양돈 뉴스를 깊이 있게.{% endblock %}">
   <meta name="theme-color" content="#0e0e10">
-  <link rel="canonical" href="{% block canonical %}https://handontoday.com{{ request.path }}{% endblock %}">
+  <link rel="canonical" href="https://handontoday.com{{ request.path }}">
   {# ─── Open Graph ──────────────────────────────────────── #}
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}한돈투데이 · Handon Today{% endblock %}">
@@ -23,6 +23,14 @@
   <meta name="twitter:title" content="{% block twitter_title %}한돈투데이 · Handon Today{% endblock %}">
   <meta name="twitter:description" content="{% block twitter_description %}매일 발행되는 양돈 산업 전문 미디어{% endblock %}">
   <meta name="twitter:image" content="{% block twitter_image %}https://handontoday.com/static/images/og-default.png{% endblock %}">
+  {# ─── Google Analytics ────────────────────────────────── #}
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
   {# ─── 폰트 ───────────────────────────────────────────── #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

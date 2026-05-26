@@ -7,41 +7,13 @@
 
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django import forms
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponsePermanentRedirect, HttpResponse
 from django.db.models import Q
 from .models import Article
-
-
-class EmailSignupForm(UserCreationForm):
-    """이메일 기반 회원가입 폼"""
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={'placeholder': 'name@example.com'})
-    )
-
-    class Meta:
-        model = User
-        fields = ('email', 'password1', 'password2')
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.username = self.cleaned_data['email']  # username = email
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-        return user
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(username=email).exists():
-            raise forms.ValidationError('이미 사용 중인 이메일입니다.')
-        return email
 
 
 class HomeView(ListView):
@@ -50,26 +22,21 @@ class HomeView(ListView):
     template_name = 'articles/home.html'
     context_object_name = 'articles'
     paginate_by = 15
-    
+
     def get_queryset(self):
         """카테고리 필터링"""
         queryset = Article.objects.filter(publish_status='published').order_by('-published_at')
-        
+
         # URL 파라미터로 카테고리 필터
         category = self.request.GET.get('cat')
         if category:
             queryset = queryset.filter(category=category)
 
-        # 브리핑 필터 (?type=briefing)
-        type_filter = self.request.GET.get('type')
-        if type_filter == 'briefing':
-            queryset = queryset.filter(title__startswith='🐷 한돈투데이 모닝 브리핑')
-
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # 카테고리별 active 상태
         category = self.request.GET.get('cat')
         if category == '국내':
@@ -82,7 +49,7 @@ class HomeView(ListView):
             context['active_nav'] = 'policy'
         else:
             context['active_nav'] = 'home'
-        
+
         # 통계 — aggregate로 DB 쿼리 최소화
         from django.db.models import Count, Sum, Q
         from django.utils import timezone
@@ -100,14 +67,16 @@ class HomeView(ListView):
             publish_status='published',
             published_at__date=today
         ).aggregate(s=Sum('view_count'))['s'] or 0
-        
+
         return context
+
+
 class ArticleDetailView(DetailView):
     """기사 상세 페이지"""
     model = Article
     template_name = 'articles/detail.html'
     context_object_name = 'article'
-    
+
     def get_object(self):
         """URL에서 id와 slug로 조회"""
         article_id = self.kwargs.get('article_id')
@@ -138,16 +107,14 @@ class ArticleDetailView(DetailView):
         return SlugRedirect(url)
 
     def get(self, request, *args, **kwargs):
+        # slug 불일치 redirect 처리 + 조회수 증가를 하나의 get()으로 통합
         try:
-            return super().get(request, *args, **kwargs)
+            self.object = self.get_object()
         except Exception as e:
             if hasattr(e, 'redirect_url'):
                 return HttpResponsePermanentRedirect(e.redirect_url)
             raise
-    
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        
+
         # 세션 기반 중복 방지 — 같은 기사 재방문 시 조회수 안 올림
         article = self.object
         session_key = f'viewed_article_{article.id}'
@@ -155,14 +122,15 @@ class ArticleDetailView(DetailView):
             article.view_count += 1
             article.save(update_fields=['view_count'])
             request.session[session_key] = True
-        
-        return response
-    
+
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         article = self.object
-        
+
         import re
         match = re.search(r'<blockquote>.*?</blockquote>', article.body_html or '', re.DOTALL)
         context['summary_html'] = match.group(0) if match else None
@@ -174,7 +142,7 @@ class ArticleDetailView(DetailView):
         ).exclude(
             id=article.id
         ).order_by('-created_at')[:3]
-        
+
         return context
 
 
@@ -184,7 +152,7 @@ class ArchiveView(ListView):
     template_name = 'articles/archive.html'
     context_object_name = 'articles'
     paginate_by = 15
-    
+
     def get_queryset(self):
         """필터링된 기사 목록"""
         sort = self.request.GET.get('sort', 'latest')
@@ -195,68 +163,76 @@ class ArchiveView(ListView):
         queryset = Article.objects.filter(
             publish_status='published'
         ).order_by(order)
-        
+
         # 카테고리
         category = self.kwargs.get('category')
         if category in ['국내', '글로벌']:
             queryset = queryset.filter(category=category)
-        
+
         # 년도
         year = self.kwargs.get('year')
         if year:
             queryset = queryset.filter(created_at__year=year)
-        
+
         # 월
         month = self.kwargs.get('month')
         if month:
             queryset = queryset.filter(created_at__month=month)
-        
+
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # 필터 정보
         context['archive_sort'] = self.request.GET.get('sort', 'latest')
         context['archive_category'] = self.kwargs.get('category')
         context['archive_year'] = self.kwargs.get('year')
         context['archive_month'] = self.kwargs.get('month')
-        
+
         # 사용 가능한 년도/월 목록
         dates = Article.objects.filter(
             publish_status='published'
         ).dates('created_at', 'month', order='DESC')
-        
+
         context['available_dates'] = dates
-        
+
         # 카테고리별 개수 (사이드바용)
         context['domestic_count'] = Article.objects.filter(
             publish_status='published',
             category='국내'
         ).count()
-        
+
         context['global_count'] = Article.objects.filter(
             publish_status='published',
             category='글로벌'
         ).count()
-        
+
         return context
+
 
 class SignupView(CreateView):
     """회원가입"""
-    form_class = EmailSignupForm
+    form_class = UserCreationForm
     template_name = 'articles/signup.html'
     success_url = reverse_lazy('articles:login')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['active_nav'] = None
         return context
 
+
 def logout_view(request):
     """로그아웃"""
     logout(request)
     return redirect('articles:home')
+
+
+def robots_txt(request):
+    """robots.txt"""
+    content = "User-agent: *\nAllow: /\n\nSitemap: https://handontoday.com/sitemap.xml\n"
+    return HttpResponse(content, content_type="text/plain")
 
 
 def honeypot_view(request):
