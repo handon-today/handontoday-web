@@ -7,12 +7,12 @@
   <title>{% block title %}한돈투데이 · Handon Today{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}매일 발행되는 양돈 산업 전문 미디어. 국내·해외 양돈 뉴스를 깊이 있게.{% endblock %}">
   <meta name="theme-color" content="#0e0e10">
-  <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+  <link rel="canonical" href="{% block canonical %}https://handontoday.com{{ request.path }}{% endblock %}">
   {# ─── Open Graph ──────────────────────────────────────── #}
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:title" content="{% block og_title %}한돈투데이 · Handon Today{% endblock %}">
   <meta property="og:description" content="{% block og_description %}매일 발행되는 양돈 산업 전문 미디어{% endblock %}">
-  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:url" content="https://handontoday.com{{ request.path }}">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="한돈투데이">
   <meta property="og:image" content="{% block og_image %}https://handontoday.com/static/images/og-default.png{% endblock %}">

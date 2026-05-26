@@ -111,6 +111,14 @@
       <div class="related-grid">
         {% for rel in related_articles %}
         <a href="{{ rel.get_absolute_url }}" class="related-card">
+          {# ── 썸네일 ── #}
+          {% if rel.image_url %}
+          <div class="related-thumb" style="background-image:url('{{ rel.image_url }}');"></div>
+          {% else %}
+          <div class="related-thumb related-thumb--fallback {% if rel.category == '국내' %}rel-domestic{% else %}rel-global{% endif %}">
+            <span class="rel-fallback-label">{{ rel.category }}</span>
+          </div>
+          {% endif %}
           <div class="related-meta">
             {% if rel.category == '국내' %}
             <span class="cat-pill domestic">국내</span>

@@ -13,137 +13,412 @@
   
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
     <h1 style="font-family:'Instrument Serif',serif; font-size:42px; font-style:italic; white-space:nowrap;">최신 기사</h1>
-    
     <div class="filter-buttons" style="display:flex; gap:12px;">
-      <a href="{% url 'articles:home' %}" 
-         class="filter-btn {% if not request.GET.cat %}active{% endif %}"
-         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
-        전체
-      </a>
-      <a href="?cat=국내" 
-         class="filter-btn {% if request.GET.cat == '국내' %}active{% endif %}"
-         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
-        국내
-      </a>
-      <a href="?cat=글로벌" 
-         class="filter-btn {% if request.GET.cat == '글로벌' %}active{% endif %}"
-         style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px; transition:all .15s;">
-        글로벌
-      </a>
+      <a href="{% url 'articles:home' %}" class="filter-btn {% if not request.GET.cat %}active{% endif %}">전체</a>
+      <a href="?cat=국내" class="filter-btn {% if request.GET.cat == '국내' %}active{% endif %}">국내</a>
+      <a href="?cat=글로벌" class="filter-btn {% if request.GET.cat == '글로벌' %}active{% endif %}">글로벌</a>
     </div>
   </div>
 
-  <div class="articles-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:32px;">
+  <div class="articles-grid">
     {% for article in articles %}
-    <article class="article-card" style="border-bottom:1px solid var(--line); padding-bottom:20px;">
-      <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
-        <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; 
-                     {% if article.category == '국내' %}color:#c0392b;{% else %}color:#2980b9;{% endif %}">
-          {{ article.category }}
-        </span>
-        <span style="color:var(--muted); font-size:11px;">•</span>
-        <span style="font-size:11px; color:var(--muted);">{{ article.published_at|date:"m.d" }}</span>
-        <span style="color:var(--muted); font-size:11px;">•</span>
-        <span style="font-size:11px; color:var(--muted);">조회 {{ article.view_count }}</span>
+
+    {% if forloop.counter == 14 %}
+    <div class="ad-slot ad-slot-2" aria-label="광고 영역 2">
+      <aside class="cf-ad-banner" aria-label="CLEARFARM 악취관리 컨설팅 광고" onclick="window.open('/static/clearfarm.html','_blank')" style="cursor:pointer">
+        <div class="cf-tech-lines" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="cf-ad-content">
+          <div class="cf-brand-block">
+            <div class="cf-ad-label">B2B Odor Intelligence</div>
+            <div class="cf-brand-name">CLEAR<span>FARM</span></div>
+          </div>
+          <div class="cf-message-block">
+            <div class="cf-headline">농장 악취, 데이터로 잡습니다</div>
+            <ul class="cf-metrics">
+              <li>민원 89% 감소</li>
+              <li>IoT 센서</li>
+              <li>AI 예측 모델</li>
+              <li>환경부 인증</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cf-cta-wrap">
+          <div class="cf-cta-button">무료 진단 신청</div>
+        </div>
+        <div style="position:absolute;top:6px;right:10px;font-size:9px;font-weight:700;letter-spacing:.1em;color:#94a3b8">광고</div>
+      </aside>
+    </div>
+    {% endif %}
+
+    {% if forloop.counter == 6 %}
+    <div class="ad-slot" aria-label="광고 영역">
+      <div class="ad-banner" onclick="window.open('pijrun.html','_blank')" style="cursor:pointer">
+        <div class="ad-tag">광고</div>
+        <div class="ad-content">
+          <div class="ad-left">
+            <div class="ad-emoji-wrap">🐷</div>
+            <div class="ad-brand">돼지런</div>
+            <div class="ad-tagline">Korea No.1 Pig Feed</div>
+          </div>
+          <div class="ad-center">
+            <div class="ad-headline">우리 돼지, <em>더 빠르게</em> 더 건강하게, 돼지런하게</div>
+            <div class="ad-body">
+              사육기간 <strong>8일 단축</strong> · 출하체중 <strong>+3.2kg</strong> · 사료효율 <strong>업계 1위</strong>
+            </div>
+            <div class="ad-pills">
+              <span class="pill">🌽 Non-GMO 원료</span>
+              <span class="pill">🔬 서울대 공동연구</span>
+              <span class="pill">🏆 2025 농식품부 장관상</span>
+            </div>
+          </div>
+          <div class="ad-right">
+            <div class="ad-price-box">
+              <div class="ad-price-label">샘플 신청</div>
+              <div class="ad-price">무료</div>
+              <div class="ad-cta-btn">지금 바로 →</div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <h2 style="font-family:'Instrument Serif',serif; font-size:20px; margin-bottom:10px; line-height:1.3;">
-        <a href="{% url 'articles:detail' article.id article.slug %}" 
-           style="color:var(--ink); text-decoration:none;">
-          {{ article.title }}
-        </a>
-      </h2>
-      
-      <p style="color:var(--ink-soft); font-size:13px; line-height:1.5;">
-        {{ article.deck|default:article.body|striptags|truncatewords:15 }}
-      </p>
+    </div>
+    {% endif %}
+
+    <style>
+    .ad-slot { padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .ad-banner {
+      position: relative;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      border-radius: 10px;
+      padding: 16px 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .ad-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+    .ad-banner::before {
+      content: "";
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, rgba(192,57,43,.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .ad-tag {
+      position: absolute; top: 8px; right: 12px;
+      font-size: 9px; font-weight: 700; letter-spacing: .1em;
+      color: rgba(255,255,255,.35);
+    }
+    .ad-content { display: flex; align-items: center; gap: 20px; }
+    .ad-left { flex-shrink: 0; text-align: center; }
+    .ad-emoji-wrap { font-size: 36px; line-height: 1; margin-bottom: 4px; }
+    .ad-brand { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: .08em; }
+    .ad-tagline { font-size: 9px; color: rgba(255,255,255,.45); letter-spacing: .1em; text-transform: uppercase; }
+    .ad-center { flex: 1; min-width: 0; }
+    .ad-headline { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 6px; }
+    .ad-headline em { color: #e74c3c; font-style: normal; }
+    .ad-body { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 8px; line-height: 1.5; }
+    .ad-body strong { color: #f39c12; }
+    .ad-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill { font-size: 10px; color: rgba(255,255,255,.8); background: rgba(255,255,255,.1); border-radius: 20px; padding: 3px 8px; white-space: nowrap; }
+    .ad-right { flex-shrink: 0; }
+    .ad-price-box {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 90px;
+    }
+    .ad-price-label { font-size: 10px; color: rgba(255,255,255,.6); margin-bottom: 2px; }
+    .ad-price { font-size: 22px; font-weight: 900; color: #2ecc71; line-height: 1; margin-bottom: 8px; }
+    .ad-cta-btn {
+      background: #c0392b; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 5px 10px; border-radius: 4px;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .ad-headline { font-size: 14px; }
+      .ad-body { display: none; }
+      .ad-pills { display: none; }
+      .ad-left .ad-emoji-wrap { font-size: 26px; }
+      .ad-price-box { padding: 8px 10px; min-width: 70px; }
+      .ad-price { font-size: 16px; }
+    }
+    </style>
+
+    <article class="article-card">
+      {# ── 좌측 썸네일 ── #}
+      <a href="{% url 'articles:detail' article.id article.slug %}" class="card-thumb-link" tabindex="-1" aria-hidden="true">
+        {% if article.image_url %}
+          <div class="card-thumb" style="background-image:url('{{ article.image_url }}');"></div>
+        {% else %}
+          <div class="card-thumb card-thumb--fallback {% if article.category == '국내' %}thumb-domestic{% else %}thumb-global{% endif %}">
+            <span class="thumb-fallback-label">{{ article.category }}</span>
+          </div>
+        {% endif %}
+      </a>
+
+      {# ── 우측 텍스트 ── #}
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="cat-badge {% if article.category == '국내' %}cat-domestic{% else %}cat-global{% endif %}">{{ article.category }}</span>
+          <span class="meta-dot">•</span>
+          <span class="meta-text">{{ article.published_at|date:"m.d" }}</span>
+          <span class="meta-dot">•</span>
+          <span class="meta-text">조회 {{ article.view_count }}</span>
+        </div>
+        <h2 class="card-title">
+          <a href="{% url 'articles:detail' article.id article.slug %}" class="card-title-link">{{ article.title }}</a>
+        </h2>
+        <p class="card-deck">{{ article.deck|default:article.body|striptags|truncatewords:18 }}</p>
+      </div>
     </article>
+
     {% empty %}
-    <p style="grid-column:1/-1; text-align:center; color:var(--muted); padding:60px 0;">
-      기사가 없습니다.
-    </p>
+    <p style="grid-column:1/-1; text-align:center; color:var(--muted); padding:60px 0;">기사가 없습니다.</p>
     {% endfor %}
   </div>
 
-  <!-- 페이지네이션 -->
   {% if is_paginated %}
   <div style="display:flex; justify-content:center; gap:8px; margin-top:48px; padding-bottom:48px;">
     {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}"
-       style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px;">
-      ← 이전
-    </a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}" class="page-btn">← 이전</a>
     {% endif %}
-    <span style="padding:8px 16px; font-size:14px; color:var(--muted);">
-      {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-    </span>
+    <span class="page-cur">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}"
-       style="padding:8px 16px; border:1px solid var(--line); border-radius:6px; text-decoration:none; color:var(--ink); font-size:14px;">
-      다음 →
-    </a>
+    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.cat %}&cat={{ request.GET.cat }}{% endif %}" class="page-btn">다음 →</a>
     {% endif %}
   </div>
   {% endif %}
 
 </div>
 
-<!-- 통계 바 (footer 바로 위) -->
 <div class="stats-strip">
   <div class="container" style="max-width:1400px; margin:0 auto; padding:0 20px;">
     <div class="stats-grid">
-      <div class="stat">
-        <span class="stat-value">{{ korea_count|intcomma }}<small style="font-size:0.6em; margin-left:4px;">건</small></span>
-        <span class="stat-label">국내 기사</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">{{ global_count|intcomma }}<small style="font-size:0.6em; margin-left:4px;">건</small></span>
-        <span class="stat-label">글로벌 기사</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">{{ today_views|default:0|intcomma }}<small style="font-size:0.6em; margin-left:4px;">명</small></span>
-        <span class="stat-label">오늘 방문자</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">{{ total_views|default:0|intcomma }}<small style="font-size:0.6em; margin-left:4px;">회</small></span>
-        <span class="stat-label">총 방문</span>
-      </div>
+      <div class="stat"><span class="stat-value">{{ korea_count|intcomma }}<small style="font-size:0.6em;margin-left:4px;">건</small></span><span class="stat-label">국내 기사</span></div>
+      <div class="stat"><span class="stat-value">{{ global_count|intcomma }}<small style="font-size:0.6em;margin-left:4px;">건</small></span><span class="stat-label">글로벌 기사</span></div>
+      <div class="stat"><span class="stat-value">{{ today_views|default:0|intcomma }}<small style="font-size:0.6em;margin-left:4px;">명</small></span><span class="stat-label">오늘 방문자</span></div>
+      <div class="stat"><span class="stat-value">{{ total_views|default:0|intcomma }}<small style="font-size:0.6em;margin-left:4px;">회</small></span><span class="stat-label">총 방문</span></div>
     </div>
   </div>
 </div>
 
 <style>
-.filter-btn.active {
-  border-color: var(--accent);
-  border-width: 2px;
-  color: var(--accent);
-  font-weight: 600;
+/* ─── 필터 버튼 ─── */
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+  transition: all .15s;
 }
-.filter-btn:hover {
-  border-color: var(--ink);
+.filter-btn.active { border-color: var(--accent); border-width: 2px; color: var(--accent); font-weight: 600; }
+.filter-btn:hover  { border-color: var(--ink); }
+
+/* ─── 기사 그리드: 1열 리스트 ─── */
+.articles-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 기사 카드: 가로 레이아웃 ─── */
+.article-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ─── 썸네일: 좌측 고정 크기 ─── */
+.card-thumb-link {
+  flex-shrink: 0;
+  display: block;
+  width: 120px;
+  height: 80px;
+}
+.card-thumb {
+  width: 120px;
+  height: 80px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.card-thumb--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-thumb--fallback.thumb-domestic {
+  background: #c0392b12;
+  border: 1px solid #c0392b22;
+}
+.card-thumb--fallback.thumb-global {
+  background: #1e609112;
+  border: 1px solid #1e609122;
+}
+.thumb-fallback-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+.thumb-domestic .thumb-fallback-label { color: #c0392b; }
+.thumb-global   .thumb-fallback-label { color: #1e6091; }
+
+/* ─── 카드 바디: 우측 텍스트 ─── */
+.card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 메타 ─── */
+.card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.cat-badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.cat-badge.cat-domestic { color: #c0392b; }
+.cat-badge.cat-global   { color: #2980b9; }
+.meta-dot  { color: var(--muted); font-size: 11px; }
+.meta-text { font-size: 11px; color: var(--muted); }
+
+/* ─── 제목: 2줄 clamp ─── */
+.card-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 19px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-title-link { color: var(--ink); text-decoration: none; }
+.card-title-link:hover { color: var(--accent); }
+
+/* ─── 요약: 1줄 clamp ─── */
+.card-deck {
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── 광고 슬롯 CSS는 인라인으로 이동 ─── */
+
+/* ─── 페이지네이션 ─── */
+.page-btn { padding: 8px 16px; border: 1px solid var(--line); border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 14px; }
+.page-cur { padding: 8px 16px; font-size: 14px; color: var(--muted); }
+
+/* ─── 모바일 ─── */
+@media (max-width: 600px) {
+  .card-thumb-link { width: 90px; height: 60px; }
+  .card-thumb { width: 90px; height: 60px; }
+  .card-title { font-size: 15px; }
+  .card-deck { display: none; }
 }
 @media (max-width: 430px) {
-  .filter-buttons a {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-  }
-  .filter-buttons {
-    gap: 6px !important;
-  }
-  .article-card p {
-    display: none !important;
-  }
-  .articles-grid {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
-  }
-  .article-card {
-    padding-bottom: 8px !important;
-  }
-  .stats-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 16px !important;
-  }
+  .filter-btn { padding: 6px 10px; font-size: 12px; }
+  .filter-buttons { gap: 6px; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
+}
+
+/* ─── 광고 슬롯 2 (CLEARFARM — GPT 디자인) ─── */
+.ad-slot-2 { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.cf-ad-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #d8dee8;
+  border-left: 6px solid #2563eb;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(15,23,42,.06);
+  overflow: hidden;
+  height: 100px;
+  transition: box-shadow .2s;
+}
+.cf-ad-banner:hover { box-shadow: 0 4px 16px rgba(37,99,235,.12); }
+.cf-ad-banner::after {
+  content: "";
+  position: absolute; top: 0; right: 0;
+  width: 220px; height: 100%;
+  background: radial-gradient(circle at top right, rgba(37,99,235,.12), transparent 58%);
+  pointer-events: none;
+}
+.cf-tech-lines {
+  position: absolute; right: 145px; top: 16px;
+  width: 72px; height: 68px; opacity: .22; z-index: 0;
+}
+.cf-tech-lines span {
+  position: absolute; left: 0; width: 100%; height: 1px; background: #2563eb;
+}
+.cf-tech-lines span:nth-child(1){top:8px;width:72px}
+.cf-tech-lines span:nth-child(2){top:24px;width:52px}
+.cf-tech-lines span:nth-child(3){top:40px;width:64px}
+.cf-tech-lines span:nth-child(4){top:56px;width:42px}
+.cf-ad-content {
+  display: flex; align-items: center; gap: 24px;
+  padding: 0 22px; height: 100%; position: relative; z-index: 1;
+}
+.cf-brand-block { width: 150px; flex-shrink: 0; }
+.cf-ad-label {
+  display: inline-block; margin-bottom: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: #64748b; text-transform: uppercase;
+}
+.cf-brand-name {
+  font-size: 22px; font-weight: 800; letter-spacing: -.03em;
+  color: #0f172a; line-height: 1;
+}
+.cf-brand-name span { color: #2563eb; }
+.cf-message-block { min-width: 0; }
+.cf-headline {
+  font-size: 20px; font-weight: 800; letter-spacing: -.04em;
+  color: #111827; line-height: 1.12; margin-bottom: 8px; white-space: nowrap;
+}
+.cf-metrics {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0; padding: 0; list-style: none;
+  font-size: 12px; font-weight: 700; color: #475569; white-space: nowrap;
+}
+.cf-metrics li { display: flex; align-items: center; gap: 6px; }
+.cf-metrics li::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: #2563eb; opacity: .85;
+}
+.cf-cta-wrap {
+  height: 100%; display: flex; align-items: center;
+  padding-right: 22px; position: relative; z-index: 1; flex-shrink: 0;
+}
+.cf-cta-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 38px; padding: 0 18px; border-radius: 3px;
+  background: #1d4ed8; color: #fff;
+  font-size: 14px; font-weight: 800; letter-spacing: -.02em;
+  box-shadow: 0 2px 6px rgba(29,78,216,.22);
+  transition: background .15s;
+}
+.cf-ad-banner:hover .cf-cta-button { background: #1e40af; }
+@media (max-width: 600px) {
+  .cf-ad-banner { height: auto; padding: 14px 0; }
+  .cf-tech-lines { display: none; }
+  .cf-headline { font-size: 15px; white-space: normal; }
+  .cf-metrics { display: none; }
+  .cf-brand-block { width: 110px; }
 }
 </style>
 {% endblock %}

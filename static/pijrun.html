@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>돼지런 — 우리 돼지, 돼지런하게!</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#ff6b9d;--pink-light:#ffe0ee;--pink-dark:#d94f7e;
+  --orange:#ff9500;--yellow:#ffd60a;
+  --green:#4caf50;--green-light:#e8f5e9;
+  --red:#e53935;
+  --bg:#fff9fb;--bg2:#fff0f5;
+  --ink:#1a1a2e;--muted:#888;
+  --r:16px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 40px;
+  background:rgba(255,249,251,.92);backdrop-filter:blur(10px);
+  border-bottom:2px solid var(--pink-light);
+}
+.nav-logo{font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--pink-dark);letter-spacing:.02em}
+.nav-logo em{color:var(--orange);font-style:normal}
+.nav-cta{
+  background:var(--pink);color:#fff;font-weight:700;font-size:13px;
+  padding:8px 20px;border-radius:50px;text-decoration:none;
+  box-shadow:0 4px 12px rgba(255,107,157,.35);
+  transition:all .2s;
+}
+.nav-cta:hover{background:var(--pink-dark);transform:translateY(-2px)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;
+  padding:120px 24px 80px;
+  background:linear-gradient(180deg,#fff9fb 0%,#ffe8f2 100%);
+  position:relative;overflow:hidden;
+}
+/* 배경 원들 */
+.hero::before{
+  content:"";position:absolute;top:-80px;right:-80px;
+  width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,107,157,.12),transparent 70%);
+}
+.hero::after{
+  content:"";position:absolute;bottom:-60px;left:-60px;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,149,0,.1),transparent 70%);
+}
+
+/* 캐릭터 */
+.pig-hero{
+  position:relative;display:inline-block;
+  margin-bottom:24px;animation:bounce 2s ease-in-out infinite;
+}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-16px) rotate(2deg)}}
+
+.pig-face{
+  width:140px;height:140px;border-radius:50%;
+  background:linear-gradient(135deg,#ffb3c6,#ff8fab);
+  display:flex;align-items:center;justify-content:center;
+  font-size:80px;
+  box-shadow:0 8px 32px rgba(255,107,157,.3),inset 0 -4px 8px rgba(0,0,0,.08);
+  position:relative;
+}
+.pig-face::after{
+  content:"⚡";position:absolute;top:-8px;right:-8px;
+  font-size:28px;animation:spin 2s linear infinite;
+}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+.speech-bubble{
+  position:absolute;top:-20px;right:-120px;
+  background:#fff;border:2px solid var(--pink);
+  border-radius:14px;padding:6px 14px;
+  font-size:13px;font-weight:700;color:var(--pink-dark);
+  white-space:nowrap;
+  box-shadow:0 4px 12px rgba(255,107,157,.15);
+}
+.speech-bubble::before{
+  content:"";position:absolute;left:-10px;top:50%;transform:translateY(-50%);
+  border:6px solid transparent;border-right-color:var(--pink);
+}
+
+.hero-badge{
+  display:inline-block;
+  background:var(--yellow);color:#7a5800;
+  font-size:12px;font-weight:700;letter-spacing:.08em;
+  padding:5px 14px;border-radius:50px;margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(255,214,10,.4);
+}
+.hero-h1{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(36px,8vw,72px);
+  line-height:1.15;margin-bottom:16px;
+  letter-spacing:-.01em;
+}
+.hero-h1 .pink{color:var(--pink-dark)}
+.hero-h1 .orange{color:var(--orange)}
+.hero-sub{
+  font-size:clamp(15px,2.5vw,20px);color:var(--muted);
+  margin-bottom:40px;line-height:1.7;
+}
+
+/* 핵심 수치 3개 */
+.hero-nums{
+  display:flex;gap:16px;justify-content:center;
+  flex-wrap:wrap;margin-bottom:40px;
+}
+.num-pill{
+  background:#fff;border:2px solid var(--pink-light);
+  border-radius:50px;padding:12px 24px;
+  box-shadow:0 4px 16px rgba(255,107,157,.1);
+  text-align:center;min-width:120px;
+}
+.num-big{
+  font-family:'JetBrains Mono',monospace;
+  font-size:26px;font-weight:700;
+  color:var(--pink-dark);line-height:1;margin-bottom:4px;
+}
+.num-label{font-size:11px;color:var(--muted);font-weight:500}
+
+.hero-btn{
+  display:inline-block;
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  color:#fff;font-family:'Black Han Sans',sans-serif;
+  font-size:20px;letter-spacing:.04em;
+  padding:18px 48px;border-radius:50px;
+  text-decoration:none;
+  box-shadow:0 8px 24px rgba(255,107,157,.4);
+  transition:all .25s;
+}
+.hero-btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(255,107,157,.5)}
+
+/* ── FEATURES ── */
+.features{padding:100px 24px;background:#fff}
+.section-head{text-align:center;margin-bottom:56px}
+.section-tag{
+  display:inline-block;background:var(--pink-light);color:var(--pink-dark);
+  font-size:12px;font-weight:700;letter-spacing:.08em;
+  padding:5px 14px;border-radius:50px;margin-bottom:14px;
+}
+.section-title{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(26px,4vw,40px);line-height:1.2;
+}
+
+.feat-grid{
+  max-width:1000px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.feat-card{
+  background:var(--bg);border:2px solid var(--pink-light);
+  border-radius:20px;padding:36px 28px;text-align:center;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.feat-card:hover{transform:translateY(-6px);border-color:var(--pink);box-shadow:0 12px 32px rgba(255,107,157,.15)}
+.feat-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--pink),var(--orange));
+}
+.feat-pig{font-size:52px;margin-bottom:16px;display:block}
+.feat-title{font-family:'Black Han Sans',sans-serif;font-size:22px;margin-bottom:10px}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.75}
+.feat-num{
+  display:inline-block;margin-top:16px;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:13px;color:var(--orange);
+  background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);
+  padding:4px 12px;border-radius:8px;
+}
+
+/* ── STATS ── */
+.stats{
+  padding:100px 24px;
+  background:linear-gradient(135deg,var(--pink-dark) 0%,#a0245c 100%);
+  text-align:center;position:relative;overflow:hidden;
+}
+.stats::before{
+  content:"🐷🐷🐷🐷🐷🐷🐷🐷🐷🐷🐷🐷";
+  position:absolute;top:0;left:0;right:0;
+  font-size:40px;opacity:.06;letter-spacing:8px;
+  white-space:nowrap;overflow:hidden;
+  transform:rotate(-5deg) scale(1.2);
+}
+.stats-title{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(28px,4vw,44px);color:#fff;
+  margin-bottom:8px;position:relative;
+}
+.stats-sub{font-size:15px;color:rgba(255,255,255,.65);margin-bottom:56px;position:relative}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:20px;max-width:900px;margin:0 auto;
+  position:relative;
+}
+.stat-box{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:16px;padding:28px 16px;
+  backdrop-filter:blur(8px);
+}
+.stat-box-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:36px;font-weight:700;color:#fff;
+  line-height:1;margin-bottom:8px;
+}
+.stat-box-num span{font-size:18px;color:var(--yellow)}
+.stat-box-label{font-size:12px;color:rgba(255,255,255,.65);line-height:1.5}
+.stat-pig{font-size:28px;margin-bottom:8px;display:block}
+
+/* ── FORM ── */
+.form-section{
+  padding:100px 24px;
+  background:var(--bg2);
+}
+.form-wrap{max-width:560px;margin:0 auto}
+.form-pig-row{
+  display:flex;justify-content:center;gap:-8px;
+  margin-bottom:24px;font-size:48px;
+}
+.form-card{
+  background:#fff;border:2px solid var(--pink-light);
+  border-radius:24px;padding:40px 36px;
+  box-shadow:0 8px 40px rgba(255,107,157,.12);
+}
+.form-title{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:28px;margin-bottom:6px;color:var(--pink-dark);
+}
+.form-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.form-group{margin-bottom:16px}
+.form-group label{
+  display:block;font-size:12px;font-weight:700;
+  color:var(--ink);letter-spacing:.04em;margin-bottom:6px;
+}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:12px 16px;
+  border:1.5px solid #e8d5df;border-radius:10px;
+  font-family:'Noto Sans KR',sans-serif;font-size:14px;
+  color:var(--ink);background:#fff;outline:none;
+  transition:border-color .2s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--pink);
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{
+  width:100%;margin-top:8px;
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark));
+  color:#fff;font-family:'Black Han Sans',sans-serif;
+  font-size:20px;letter-spacing:.04em;
+  padding:16px;border-radius:50px;border:none;cursor:pointer;
+  box-shadow:0 6px 20px rgba(255,107,157,.35);
+  transition:all .2s;
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,107,157,.45)}
+.form-note{text-align:center;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.trust-badges{
+  display:flex;justify-content:center;gap:12px;
+  flex-wrap:wrap;margin-top:20px;
+}
+.trust-badge{
+  font-size:11px;color:var(--muted);
+  background:#fff;border:1px solid #e8d5df;
+  padding:4px 10px;border-radius:50px;
+}
+
+/* ── FOOTER ── */
+footer{
+  padding:36px 40px;text-align:center;
+  border-top:2px solid var(--pink-light);background:#fff;
+}
+.footer-logo{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:20px;color:var(--pink-dark);margin-bottom:8px;
+}
+.footer-copy{font-size:11px;color:var(--muted);line-height:1.8}
+
+/* ── 반응형 ── */
+@media(max-width:768px){
+  nav{padding:12px 20px}
+  .feat-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .form-row{grid-template-columns:1fr}
+  .form-card{padding:28px 20px}
+  .speech-bubble{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">돼지<em>런</em> 🐷</div>
+  <a href="#sample" class="nav-cta">무료 샘플 받기 →</a>
+</nav>
+
+<!-- 히어로 -->
+<section class="hero">
+  <div class="pig-hero">
+    <div class="pig-face">🐷</div>
+    <div class="speech-bubble">저 오늘도 돼지런해요!</div>
+  </div>
+
+  <div class="hero-badge">🏆 2025 농식품부 장관상 · 3,200개 농가 선택</div>
+
+  <h1 class="hero-h1">
+    우리 돼지,<br>
+    <span class="pink">더 빠르게</span> 더 건강하게,<br>
+    <span class="orange">돼지런</span>하게
+  </h1>
+  <p class="hero-sub">
+    대한민국 No.1 배합사료 돼지런.<br>
+    사육기간은 줄이고, 출하체중은 높이고, 폐사율은 반으로.
+  </p>
+
+  <div class="hero-nums">
+    <div class="num-pill">
+      <div class="num-big">-8일</div>
+      <div class="num-label">사육기간 단축</div>
+    </div>
+    <div class="num-pill">
+      <div class="num-big">+3.2<small style="font-size:16px">kg</small></div>
+      <div class="num-label">출하체중 증가</div>
+    </div>
+    <div class="num-pill">
+      <div class="num-big">-52%</div>
+      <div class="num-label">폐사율 감소</div>
+    </div>
+  </div>
+
+  <a href="#sample" class="hero-btn">🐷 무료 샘플 신청하기</a>
+</section>
+
+<!-- 특장점 3가지 -->
+<section class="features">
+  <div class="section-head">
+    <div class="section-tag">왜 돼지런인가요?</div>
+    <h2 class="section-title">우리 돼지가 달라지는 이유 3가지 🐷</h2>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <span class="feat-pig">🌽</span>
+      <div class="feat-title">Non-GMO 프리미엄 원료</div>
+      <div class="feat-desc">국내 인증 Non-GMO 옥수수·대두박만 100% 사용. 소비자 신뢰와 농가 경쟁력을 함께 높입니다.</div>
+      <div class="feat-num">농식품부 인증</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-pig">⚡</span>
+      <div class="feat-title">속성 성장 포뮬러</div>
+      <div class="feat-desc">서울대 수의과 공동연구로 완성된 아미노산 최적 배합. 근육은 키우고 지방은 줄이는 특허 기술.</div>
+      <div class="feat-num">특허 제10-2847392</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-pig">🛡️</span>
+      <div class="feat-title">면역 강화 처방</div>
+      <div class="feat-desc">천연 생균제 + 프리바이오틱스 복합 처방으로 ASF 등 질병 저항성 강화. 폐사율 52% 감소 입증.</div>
+      <div class="feat-num">폐사율 -52% 실증</div>
+    </div>
+  </div>
+</section>
+
+<!-- 수치/성과 -->
+<section class="stats">
+  <h2 class="stats-title">숫자로 증명합니다 🐷</h2>
+  <p class="stats-sub">2024년 계약 농가 1,200개소 평균 실측 데이터</p>
+  <div class="stats-grid">
+    <div class="stat-box">
+      <span class="stat-pig">🕐</span>
+      <div class="stat-box-num">-<span>8일</span></div>
+      <div class="stat-box-label">사육기간 단축<br>같은 비용, 더 빠른 출하</div>
+    </div>
+    <div class="stat-box">
+      <span class="stat-pig">⚖️</span>
+      <div class="stat-box-num">+<span>3.2kg</span></div>
+      <div class="stat-box-label">출하체중 증가<br>마리당 순수익 향상</div>
+    </div>
+    <div class="stat-box">
+      <span class="stat-pig">💪</span>
+      <div class="stat-box-num">-<span>52%</span></div>
+      <div class="stat-box-label">폐사율 감소<br>손실 없이 키우세요</div>
+    </div>
+    <div class="stat-box">
+      <span class="stat-pig">🔄</span>
+      <div class="stat-box-num"><span>98.2%</span></div>
+      <div class="stat-box-label">재구매율<br>한번 써보면 압니다</div>
+    </div>
+  </div>
+</section>
+
+<!-- 샘플 신청 폼 -->
+<section class="form-section" id="sample">
+  <div class="form-wrap">
+    <div class="form-pig-row">🐷🐷🐷</div>
+    <div class="section-head">
+      <div class="section-tag">14일 무료 체험</div>
+      <h2 class="section-title" style="margin-bottom:0">직접 먹여보세요!</h2>
+    </div>
+    <br>
+    <div class="form-card">
+      <div class="form-title">무료 샘플 신청 🐷</div>
+      <p class="form-sub">14일치 샘플 + 전담 수의사 방문 컨설팅 무료.<br>신청 후 48시간 내 담당자가 연락드립니다.</p>
+
+      <form onsubmit="handleSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>농장주 성함</label>
+            <input type="text" placeholder="홍길동">
+          </div>
+          <div class="form-group">
+            <label>연락처</label>
+            <input type="tel" placeholder="010-0000-0000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>농장 소재지</label>
+            <select>
+              <option>선택해주세요</option>
+              <option>경기도</option><option>강원도</option><option>충청북도</option>
+              <option>충청남도</option><option>전라북도</option><option>전라남도</option>
+              <option>경상북도</option><option>경상남도</option><option>제주도</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>사육 두수</label>
+            <select>
+              <option>선택해주세요</option>
+              <option>100두 미만</option>
+              <option>100~500두</option>
+              <option>500~1,000두</option>
+              <option>1,000두 이상</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>현재 고민 (선택)</label>
+          <textarea rows="2" placeholder="예: 사료 효율이 떨어지고 있어요..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">🐷 무료 샘플 신청하기!</button>
+        <p class="form-note">개인정보는 샘플 배송·상담 목적으로만 사용됩니다</p>
+        <div class="trust-badges">
+          <span class="trust-badge">🔒 개인정보 보호</span>
+          <span class="trust-badge">📦 48시간 내 연락</span>
+          <span class="trust-badge">💯 100% 무료</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">돼지런 🐷</div>
+  <div class="footer-copy">
+    주식회사 피그런코리아 · 사업자등록번호 123-45-67890<br>
+    충남 천안시 서북구 돼지런로 88 · 고객센터 1588-0088<br>
+    © 2025 PigRun Korea. All rights reserved.
+  </div>
+</footer>
+
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.submit-btn');
+  btn.innerHTML = '🎉 신청 완료! 48시간 내 연락드릴게요!';
+  btn.style.background = 'linear-gradient(135deg,#4caf50,#2e7d32)';
+  btn.disabled = true;
+}
+</script>
+</body>
+</html>

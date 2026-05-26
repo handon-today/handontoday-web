@@ -178,3 +178,6 @@ CSRF_TRUSTED_ORIGINS += [
     'https://handontoday.com',
     'https://www.handontoday.com',
 ]
+
+# 카카오 공유 등 절대 URL 생성용
+SITE_URL = 'https://handontoday.com'

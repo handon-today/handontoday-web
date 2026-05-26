@@ -369,13 +369,54 @@
 .related-card {
   display: flex;
   flex-direction: column;
-  padding: var(--space-lg);
+  overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--ink);
   transition: all 0.25s;
+}
+
+/* ── 관련 기사 썸네일 ── */
+.related-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+.related-thumb--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.related-thumb--fallback.rel-domestic {
+  background: linear-gradient(135deg, #c0392b12, #c0392b06);
+  border-bottom: 1px solid #c0392b18;
+}
+.related-thumb--fallback.rel-global {
+  background: linear-gradient(135deg, #1e609112, #1e609106);
+  border-bottom: 1px solid #1e609118;
+}
+.rel-fallback-label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; opacity: .3;
+}
+.rel-domestic .rel-fallback-label { color: #c0392b; }
+.rel-global   .rel-fallback-label { color: #1e6091; }
+
+.related-meta {
+  padding: var(--space-lg) var(--space-lg) 0;
+}
+
+.related-card h4 {
+  padding: 0 var(--space-lg);
+}
+
+.related-card p {
+  padding: 0 var(--space-lg) var(--space-lg);
 }
 
 .related-card:hover {
@@ -388,6 +429,7 @@
   gap: 10px;
   align-items: center;
   margin-bottom: var(--space-sm);
+  padding: var(--space-lg) var(--space-lg) 0;
 }
 
 .related-date {
@@ -405,12 +447,14 @@
   letter-spacing: -0.015em;
   margin-bottom: var(--space-sm);
   color: var(--ink);
+  padding: 0 var(--space-lg);
 }
 
 .related-card p {
   font-size: 13px;
   color: var(--ink-soft);
   line-height: 1.5;
+  padding: 0 var(--space-lg) var(--space-lg);
 }
 
 /* ─── 반응형 (980px 이하) ─── */
