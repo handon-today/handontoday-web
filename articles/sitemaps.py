@@ -4,7 +4,6 @@ from .models import Article
 
 
 class HanDonSitemap(Sitemap):
-    """handontoday.com 도메인과 https 프로토콜 고정"""
     protocol = 'https'
 
     def get_domain(self, site=None):
@@ -31,7 +30,7 @@ class StaticSitemap(HanDonSitemap):
     priority = 0.5
 
     def items(self):
-        return ['articles:home', 'articles:archive']
+        return ['articles:home', 'articles:archive', 'articles:about']
 
     def location(self, item):
         return reverse(item)
