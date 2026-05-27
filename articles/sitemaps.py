@@ -3,7 +3,15 @@ from django.urls import reverse
 from .models import Article
 
 
-class ArticleSitemap(Sitemap):
+class HanDonSitemap(Sitemap):
+    """handontoday.com 도메인과 https 프로토콜 고정"""
+    protocol = 'https'
+
+    def get_domain(self, site=None):
+        return 'handontoday.com'
+
+
+class ArticleSitemap(HanDonSitemap):
     changefreq = "daily"
     priority = 0.8
 
@@ -18,7 +26,7 @@ class ArticleSitemap(Sitemap):
         return f'/article/{obj.id}-{slug}/'
 
 
-class StaticSitemap(Sitemap):
+class StaticSitemap(HanDonSitemap):
     changefreq = "weekly"
     priority = 0.5
 
