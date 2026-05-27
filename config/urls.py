@@ -1,15 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.sitemaps.views import sitemap
-from django.contrib.sites.requests import RequestSite
+
 from django.http import HttpResponse
 from articles.sitemaps import ArticleSitemap, StaticSitemap
 
 
-class FixedDomainSitemap:
-    """sitemap 뷰에 고정 도메인을 주입하는 래퍼"""
-    domain = 'handontoday.com'
-    name = 'handontoday.com'
 
 
 sitemaps = {
