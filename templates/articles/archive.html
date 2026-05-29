@@ -1,229 +1,414 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static humanize %}
 
-{% block title %}
-{% if archive_category %}{{ archive_category }} 아카이브{% elif archive_year %}{{ archive_year }}년 아카이브{% else %}전체 아카이브{% endif %} — 한돈투데이
-{% endblock %}
+{% block title %}아카이브 — 한돈투데이{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/archive.css' %}">
+<style>
+/* ═══════════════════════════════════════════════
+   아카이브 레이아웃
+═══════════════════════════════════════════════ */
+.archive-wrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .archive-wrap { grid-template-columns: 1fr; gap: 32px; }
+  .archive-sidebar { order: -1; }
+}
+
+/* ── 검색 바 ── */
+.search-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+}
+.search-bar input[type="text"] {
+  flex: 1;
+  padding: 11px 16px;
+  border: 1.5px solid var(--line);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .15s;
+}
+.search-bar input[type="text"]:focus { border-color: var(--accent); }
+.search-bar button {
+  padding: 11px 20px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.search-bar button:hover { opacity: .8; }
+
+/* ── 필터 툴바 ── */
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-chip {
+  padding: 6px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.filter-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.filter-chip:hover:not(.active) { border-color: var(--ink); }
+.filter-sep { color: var(--line); font-size: 18px; }
+.sort-select {
+  margin-left: auto;
+  padding: 6px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+/* ── 결과 헤더 ── */
+.result-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+.result-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-style: italic;
+}
+.result-count { font-size: 14px; color: var(--muted); }
+.search-highlight { color: var(--accent); font-weight: 700; }
+
+/* ── 기사 카드 ── */
+.articles-list { display: flex; flex-direction: column; }
+.article-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.card-thumb-link { flex-shrink: 0; display: block; width: 110px; height: 74px; }
+.card-thumb {
+  width: 110px; height: 74px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.card-thumb--fallback { display: flex; align-items: center; justify-content: center; }
+.thumb-domestic { background: #c0392b12; border: 1px solid #c0392b22; }
+.thumb-global   { background: #1e609112; border: 1px solid #1e609122; }
+.thumb-fallback-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; opacity: .4; }
+.thumb-domestic .thumb-fallback-label { color: #c0392b; }
+.thumb-global   .thumb-fallback-label { color: #1e6091; }
+
+.card-body { flex: 1; min-width: 0; }
+.card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.cat-badge { font-size: 11px; font-weight: 600; letter-spacing: .05em; }
+.cat-badge.cat-domestic { color: #c0392b; }
+.cat-badge.cat-global   { color: #2980b9; }
+.meta-dot  { color: var(--muted); font-size: 11px; }
+.meta-text { font-size: 11px; color: var(--muted); }
+
+.card-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  line-height: 1.35;
+  margin-bottom: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-title-link { color: var(--ink); text-decoration: none; }
+.card-title-link:hover { color: var(--accent); }
+.card-deck {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── 빈 결과 ── */
+.empty-state { padding: 64px 0; text-align: center; color: var(--muted); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state .empty-msg  { font-size: 16px; margin-bottom: 8px; color: var(--ink); }
+.empty-state .empty-sub  { font-size: 14px; }
+
+/* ── 페이지네이션 ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+.page-btn {
+  padding: 8px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+  transition: border-color .12s;
+}
+.page-btn:hover { border-color: var(--ink); }
+.page-cur { padding: 8px 16px; font-size: 14px; color: var(--muted); }
+
+/* ── 사이드바 ── */
+.sidebar-section { margin-bottom: 32px; }
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.sidebar-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+  transition: color .12s;
+}
+.sidebar-item:hover { color: var(--accent); }
+.sidebar-item.active { color: var(--accent); font-weight: 600; }
+.sidebar-count {
+  font-size: 12px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--line) 60%, transparent);
+  border-radius: 10px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+.sidebar-item.active .sidebar-count {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .card-thumb-link { width: 84px; height: 56px; }
+  .card-thumb { width: 84px; height: 56px; }
+  .card-title { font-size: 15px; }
+  .card-deck { display: none; }
+  .filter-toolbar { gap: 8px; }
+  .sort-select { margin-left: 0; width: 100%; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
+{% with q=search_query cat=archive_category sort=archive_sort %}
 
-<div class="page">
-  {% comment %}사이드바 — 필터{% endcomment %}
-  <aside class="sidebar">
-    <div class="crumb">
-      <a href="{% url 'articles:home' %}">홈</a> / 아카이브
-    </div>
-    
-    <h1 class="page-title">
-      {% if archive_category %}
-        {{ archive_category }}<em>.</em>
-      {% elif archive_year %}
-        {{ archive_year }}<em>.</em>
-      {% else %}
-        전체<em>.</em>
-      {% endif %}
-    </h1>
-    
-    <div class="total">TOTAL {{ articles.count }} ARTICLES</div>
-    
-    {# 카테고리 필터 #}
-    <div class="filter-group">
-      <div class="filter-label">카테고리</div>
-      <a href="{% url 'articles:archive' %}" 
-         class="filter-item {% if not archive_category %}active{% endif %}">
-        <div class="left-half">
-          <div class="dot all"></div>
-          <span>전체</span>
-        </div>
-        <span class="count">{{ domestic_count|add:global_count }}</span>
-      </a>
-      <a href="{% url 'articles:archive' category='국내' %}"
-         class="filter-item {% if archive_category == '국내' %}active{% endif %}">
-        <div class="left-half">
-          <div class="dot domestic"></div>
-          <span>국내</span>
-        </div>
-        <span class="count">{{ domestic_count }}</span>
-      </a>
-      <a href="{% url 'articles:archive' category='글로벌' %}"
-         class="filter-item {% if archive_category == '글로벌' %}active{% endif %}">
-        <div class="left-half">
-          <div class="dot global"></div>
-          <span>글로벌</span>
-        </div>
-        <span class="count">{{ global_count }}</span>
-      </a>
-    </div>
-    
-    {# 기간 필터 (available_dates 사용) #}
-    {% if available_dates %}
-    <div class="filter-group">
-      <div class="filter-label">기간</div>
-      {% for date in available_dates %}
-      {% with year=date.year %}
-      {% if forloop.first or year != prev_year %}
-      <a href="{% url 'articles:archive' year=year %}"
-         class="filter-item {% if archive_year == year %}active{% endif %}">
-        <div class="left-half">
-          <span>{{ year }}년</span>
-        </div>
-        <span class="count">{% with count=available_dates|length %}{{ count }}{% endwith %}</span>
-      </a>
-      {% endif %}
-      {% endwith %}
-      {% endfor %}
-    </div>
-    {% endif %}
-  </aside>
-  
-  {% comment %}메인 — 타임라인{% endcomment %}
-  <main class="content">
-    
-    {# 검색 및 정렬 컨트롤 #}
-    <div class="control-bar">
-      <div class="search-box">
-        <span class="icon">🔍</span>
-        <input type="text" placeholder="기사 검색..." id="search-input">
-        <span class="shortcut">⌘K</span>
+<div class="archive-wrap">
+
+  <main>
+
+    {# ── 검색 바 ── #}
+    <form method="get" action="{% url 'articles:archive' %}">
+      <div class="search-bar">
+        <input
+          type="text"
+          name="q"
+          value="{{ q }}"
+          placeholder="기사 제목, 내용으로 검색..."
+          aria-label="기사 검색"
+          autocomplete="off"
+        >
+        {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+        {% if sort and sort != 'latest' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        <button type="submit">검색</button>
       </div>
-      <div style="display:inline-flex; border:1px solid #ddd; border-radius:20px; overflow:hidden; margin-top:8px;">
-        <a href="?sort=latest" style="padding:8px 20px; font-size:13px; text-decoration:none; {% if archive_sort == 'latest' %}background:#0e0e10; color:#fff; font-weight:600;{% else %}background:#fff; color:#888;{% endif %}">최신순</a>
-        <a href="?sort=popular" style="padding:8px 20px; font-size:13px; text-decoration:none; {% if archive_sort == 'popular' %}background:#0e0e10; color:#fff; font-weight:600;{% else %}background:#fff; color:#888;{% endif %}">인기순</a>
-      </div>
-      </div>
-    </div>
-    
-    {# 결과 메타 #}
-    <div class="result-meta">
-      <div>
-        검색 결과 <strong>{{ articles.count }}건</strong>
-        {% if archive_category %}
-        <span class="active-filter">
-          {{ archive_category }}
-          <span class="x" onclick="location.href='{% url 'articles:archive' %}'">×</span>
+    </form>
+
+    {# ── 필터 툴바 ── #}
+    <div class="filter-toolbar">
+
+      <a href="{% url 'articles:archive' %}{% if q %}?q={{ q }}{% endif %}{% if sort and sort != 'latest' %}{% if q %}&{% else %}?{% endif %}sort={{ sort }}{% endif %}"
+         class="filter-chip {% if not cat %}active{% endif %}">전체</a>
+
+      <a href="{% url 'articles:archive' %}?cat=국내{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
+         class="filter-chip {% if cat == '국내' %}active{% endif %}">국내</a>
+
+      <a href="{% url 'articles:archive' %}?cat=글로벌{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
+         class="filter-chip {% if cat == '글로벌' %}active{% endif %}">글로벌</a>
+
+      <span class="filter-sep">|</span>
+
+      {% if archive_year %}
+        <span class="filter-chip active">
+          {{ archive_year }}년{% if archive_month %} {{ archive_month }}월{% endif %}
+          &nbsp;<a href="{% url 'articles:archive' %}{% if cat %}?cat={{ cat }}{% endif %}" style="color:inherit; font-weight:400;">✕</a>
         </span>
-        {% endif %}
-      </div>
-      {% if is_paginated %}
-      <div>
-        {{ page_obj.start_index }}–{{ page_obj.end_index }} / {{ page_obj.paginator.count }}
-      </div>
       {% endif %}
+
+      {# 정렬 셀렉트 #}
+      <form method="get" action="{% url 'articles:archive' %}" style="margin-left:auto; display:flex; align-items:center; gap:6px;">
+        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+        {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+        <select name="sort" class="sort-select" onchange="this.form.submit()" aria-label="정렬">
+          <option value="latest" {% if sort == 'latest' %}selected{% endif %}>최신순</option>
+          <option value="popular" {% if sort == 'popular' %}selected{% endif %}>인기순</option>
+        </select>
+      </form>
     </div>
-    
-    {# 타임라인 #}
-    <div class="timeline">
-      {% regroup articles by published_at|date:"Y-m-d" as date_groups %}
-      
-      {% for date_group in date_groups %}
-      <div class="date-group">
-        {# 날짜 라벨 #}
-        <div class="date-label">
-          <div class="day">
-            {{ date_group.grouper|date:"d" }}<em>.</em>
+
+    {# ── 결과 헤더 ── #}
+    <div class="result-header">
+      <h1 class="result-title">
+        {% if q %}
+          "<span class="search-highlight">{{ q }}</span>" 검색 결과
+        {% elif cat %}
+          {{ cat }} 기사
+        {% elif archive_year %}
+          {{ archive_year }}년{% if archive_month %} {{ archive_month }}월{% endif %}
+        {% else %}
+          전체 아카이브
+        {% endif %}
+      </h1>
+      <span class="result-count">{{ paginator.count|intcomma }}건</span>
+    </div>
+
+    {# ── 기사 목록 ── #}
+    <div class="articles-list">
+      {% for article in articles %}
+      {# ✅ Red Team 수정: article.slug|default:'no-slug' 으로 None 방지 #}
+      {% with article_url=article.get_absolute_url %}
+      <article class="article-card">
+        <a href="{{ article_url }}" class="card-thumb-link" tabindex="-1" aria-hidden="true">
+          {% if article.image_url %}
+            <div class="card-thumb" style="background-image:url('{{ article.image_url }}');"></div>
+          {% else %}
+            <div class="card-thumb card-thumb--fallback {% if article.category == '국내' %}thumb-domestic{% else %}thumb-global{% endif %}">
+              <span class="thumb-fallback-label">{{ article.category }}</span>
+            </div>
+          {% endif %}
+        </a>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="cat-badge {% if article.category == '국내' %}cat-domestic{% else %}cat-global{% endif %}">{{ article.category }}</span>
+            <span class="meta-dot">•</span>
+            <span class="meta-text">{{ article.published_at|date:"Y.m.d" }}</span>
+            <span class="meta-dot">•</span>
+            <span class="meta-text">조회 {{ article.view_count|intcomma }}</span>
           </div>
-          <div class="month">{{ date_group.grouper|date:"M Y" }}</div>
-          <div class="weekday">{{ date_group.grouper|date:"l" }}</div>
-          <div class="article-count">{{ date_group.list|length }} articles</div>
+          <h2 class="card-title">
+            <a href="{{ article_url }}" class="card-title-link">{{ article.title }}</a>
+          </h2>
+          {# ✅ body_html 우선, 없으면 body_markdown fallback #}
+          <p class="card-deck">{{ article.deck|default:article.display_body|striptags|truncatewords:18 }}</p>
         </div>
-        
-        {# 타임라인 아이템 #}
-        <div class="timeline-items">
-          {% for article in date_group.list %}
-          <a href="{{ article.get_absolute_url }}" class="timeline-item">
-            <div class="item-header">
-              <div class="item-meta">
-                {% if article.category == '국내' %}
-                <span class="cat-pill domestic">국내</span>
-                {% elif article.category == '글로벌' %}
-                <span class="cat-pill global">글로벌</span>
-                {% endif %}
-                <span class="time">{{ article.published_at|date:"H:i" }}</span>
-                <span class="dot"></span>
-                <span>조회 {{ article.view_count }}</span>
-              </div>
-              {% if article.is_hot %}
-              <span class="badge hot">🔥 HOT</span>
-              {% elif article.is_featured %}
-              <span class="badge featured">★</span>
-              {% endif %}
-            </div>
-            
-            <h3 class="item-title">{{ article.title|striptags }}</h3>
-            
-            {% if article.deck %}
-            <p class="item-deck">{{ article.deck|striptags|truncatewords:25 }}</p>
-            {% endif %}
-            
-            <div class="item-footer">
-              <div class="arrow">→</div>
-            </div>
-          </a>
-          {% endfor %}
-        </div>
-      </div>
+      </article>
+      {% endwith %}
       {% empty %}
       <div class="empty-state">
-        <p>아직 발행된 기사가 없습니다.</p>
+        <div class="empty-icon">🔍</div>
+        <div class="empty-msg">검색 결과가 없습니다</div>
+        <div class="empty-sub">다른 검색어나 필터를 사용해보세요</div>
       </div>
       {% endfor %}
     </div>
-    
-    {# 페이지네이션 #}
+
+    {# ── 페이지네이션 ── #}
     {% if is_paginated %}
-    <div class="pagination">
+    <nav class="pagination" aria-label="페이지 이동">
       {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}{% if archive_category %}&cat={{ archive_category }}{% endif %}" 
+      <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat %}&cat={{ cat }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
          class="page-btn">← 이전</a>
       {% endif %}
-      
-      <span class="page-info">
-        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-      </span>
-      
+      <span class="page-cur">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
       {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}{% if archive_category %}&cat={{ archive_category }}{% endif %}" 
+      <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if cat %}&cat={{ cat }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
          class="page-btn">다음 →</a>
       {% endif %}
-    </div>
+    </nav>
     {% endif %}
-    
+
   </main>
+
+  {# ── 사이드바 ── #}
+  <aside class="archive-sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">카테고리</div>
+      <a href="{% url 'articles:archive' %}{% if q %}?q={{ q }}{% endif %}"
+         class="sidebar-item {% if not cat %}active{% endif %}">
+        전체
+        <span class="sidebar-count">{{ total_count|intcomma }}</span>
+      </a>
+      <a href="{% url 'articles:archive' %}?cat=국내{% if q %}&q={{ q }}{% endif %}"
+         class="sidebar-item {% if cat == '국내' %}active{% endif %}">
+        국내
+        <span class="sidebar-count">{{ domestic_count|intcomma }}</span>
+      </a>
+      <a href="{% url 'articles:archive' %}?cat=글로벌{% if q %}&q={{ q }}{% endif %}"
+         class="sidebar-item {% if cat == '글로벌' %}active{% endif %}">
+        글로벌
+        <span class="sidebar-count">{{ global_count|intcomma }}</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">날짜별</div>
+      {% for date in available_dates %}
+      <a href="{% url 'articles:archive_ym' date.year date.month %}{% if cat %}?cat={{ cat }}{% endif %}"
+         class="sidebar-item {% if archive_year == date.year and archive_month == date.month %}active{% endif %}">
+        {{ date|date:"Y년 n월" }}
+      </a>
+      {% empty %}
+      <p style="font-size:13px; color:var(--muted);">날짜 정보 없음</p>
+      {% endfor %}
+    </div>
+
+  </aside>
+
 </div>
 
-{% comment %}JavaScript — 검색{% endcomment %}
-<script>
-// 간단한 검색 필터링 (클라이언트 사이드)
-const searchInput = document.getElementById('search-input');
-if (searchInput) {
-  searchInput.addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    const items = document.querySelectorAll('.timeline-item');
-    
-    items.forEach(item => {
-      const title = item.querySelector('.item-title').textContent.toLowerCase();
-      const deck = item.querySelector('.item-deck')?.textContent.toLowerCase() || '';
-      
-      if (title.includes(query) || deck.includes(query)) {
-        item.style.display = 'block';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  });
-}
-
-// ⌘K 단축키
-document.addEventListener('keydown', function(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault();
-    searchInput?.focus();
-  }
-});
-</script>
-
+{% endwith %}
 {% endblock %}
