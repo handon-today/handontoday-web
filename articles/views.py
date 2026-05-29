@@ -146,7 +146,7 @@ class ArchiveView(ListView):
 
         # 카테고리: URL 경로 우선, 없으면 쿼리스트링
         category = self.kwargs.get('category') or self.request.GET.get('cat')
-        if category in ['국내', '글로벌']:
+        if category in ['국내', '글로벌', '시황']:
             queryset = queryset.filter(category=category)
 
         # 날짜 필터
@@ -188,10 +188,12 @@ class ArchiveView(ListView):
             total=Count('id'),
             domestic=Count('id', filter=Q(category='국내')),
             global_=Count('id', filter=Q(category='글로벌')),
+            briefing=Count('id', filter=Q(category='시황')),
         )
         context['total_count'] = counts['total'] or 0
         context['domestic_count'] = counts['domestic'] or 0
         context['global_count'] = counts['global_'] or 0
+        context['briefing_count'] = counts['briefing'] or 0
 
         return context
 

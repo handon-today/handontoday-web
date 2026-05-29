@@ -16,6 +16,7 @@ class Article(models.Model):
     CATEGORY_CHOICES = [
         ('국내', '국내'),
         ('글로벌', '글로벌'),
+        ('시황', '시황'),
     ]
     
     # 발행 상태
