@@ -8,7 +8,7 @@
 import re
 import logging
 
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, TemplateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import logout
 from django.urls import reverse_lazy, reverse
@@ -193,6 +193,16 @@ class ArchiveView(ListView):
         context['domestic_count'] = counts['domestic'] or 0
         context['global_count'] = counts['global_'] or 0
 
+        return context
+
+
+class AboutView(TemplateView):
+    """소개 페이지"""
+    template_name = "articles/about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_nav"] = "about"
         return context
 
 
