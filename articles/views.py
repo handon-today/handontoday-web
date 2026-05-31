@@ -4,9 +4,10 @@
 - DetailView: 기사 상세
 - ManhwaDetailView: 만평 전용 상세
 - ArchiveView: 아카이브 (필터링, 만평/웹툰 포함)
+- AboutView: 소개 페이지
 """
 
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, TemplateView
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth import logout
@@ -165,25 +166,35 @@ class ManhwaDetailView(DetailView):
                 'article_id': article.id,
                 'slug': correct_slug,
             })
-            return HttpResponsePermanentRedirect(correct_url)
+            raise self._redirect_exception(correct_url)
 
         return article
 
+    def _redirect_exception(self, url):
+        class SlugRedirect(Exception):
+            def __init__(self, redirect_url):
+                self.redirect_url = redirect_url
+        return SlugRedirect(url)
+
     def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        article = self.object
-        session_key = f'viewed_article_{article.id}'
-        if not request.session.get(session_key):
-            article.view_count += 1
-            article.save(update_fields=['view_count'])
-            request.session[session_key] = True
-        return response
+        try:
+            response = super().get(request, *args, **kwargs)
+            article = self.object
+            session_key = f'viewed_article_{article.id}'
+            if not request.session.get(session_key):
+                article.view_count += 1
+                article.save(update_fields=['view_count'])
+                request.session[session_key] = True
+            return response
+        except Exception as e:
+            if hasattr(e, 'redirect_url'):
+                return HttpResponsePermanentRedirect(e.redirect_url)
+            raise
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         article = self.object
 
-        # 이전/다음 만평
         context['prev_manhwa'] = Article.objects.filter(
             category='만평',
             publish_status='published',
@@ -215,12 +226,10 @@ class ArchiveView(ListView):
             published_at__lte=timezone.now(),
         ).order_by(order)
 
-        # URL path 카테고리 필터
         category = self.kwargs.get('category') or self.request.GET.get('cat')
         if category in ['국내', '글로벌', '시황', '만평', '웹툰']:
             queryset = queryset.filter(category=category)
 
-        # 검색어
         q = self.request.GET.get('q', '').strip()
         if q:
             queryset = queryset.filter(
@@ -251,7 +260,6 @@ class ArchiveView(ListView):
         ).dates('created_at', 'month', order='DESC')
         context['available_dates'] = dates
 
-        # 카테고리별 카운트
         counts = Article.objects.filter(
             publish_status='published',
         ).aggregate(
@@ -269,6 +277,16 @@ class ArchiveView(ListView):
         context['manhwa_count'] = counts['manhwa'] or 0
         context['webtoon_count'] = counts['webtoon'] or 0
 
+        return context
+
+
+class AboutView(TemplateView):
+    """소개 페이지"""
+    template_name = "articles/about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_nav"] = "about"
         return context
 
 

@@ -16,6 +16,9 @@ urlpatterns = [
     # 메인 페이지
     path('', views.HomeView.as_view(), name='home'),
 
+    # 소개 페이지
+    path('about/', views.AboutView.as_view(), name='about'),
+
     # 기사 상세 (국내/글로벌/시황)
     path(
         'article/<int:article_id>-<slug:slug>/',
@@ -31,25 +34,10 @@ urlpatterns = [
     ),
 
     # 아카이브 (년도+월)
-    path(
-        'archive/<int:year>/<int:month>/',
-        views.ArchiveView.as_view(),
-        name='archive'
-    ),
+    path('archive/<int:year>/<int:month>/', views.ArchiveView.as_view(), name='archive_ym'),
 
     # 아카이브 (년도별)
-    path(
-        'archive/<int:year>/',
-        views.ArchiveView.as_view(),
-        name='archive'
-    ),
-
-    # 아카이브 (카테고리별)
-    path(
-        'archive/<str:category>/',
-        views.ArchiveView.as_view(),
-        name='archive'
-    ),
+    path('archive/<int:year>/', views.ArchiveView.as_view(), name='archive_y'),
 
     # 아카이브 (전체)
     path('archive/', views.ArchiveView.as_view(), name='archive'),
