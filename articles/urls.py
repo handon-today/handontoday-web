@@ -33,13 +33,10 @@ urlpatterns = [
         name='manhwa_detail'
     ),
 
-    # 아카이브 (년도+월)
-    path('archive/<int:year>/<int:month>/', views.ArchiveView.as_view(), name='archive_ym'),
-
-    # 아카이브 (년도별)
-    path('archive/<int:year>/', views.ArchiveView.as_view(), name='archive_y'),
-
-    # 아카이브 (전체)
+    # 아카이브 — name을 모두 'archive'로 통일 (템플릿과 일치)
+    path('archive/<int:year>/<int:month>/', views.ArchiveView.as_view(), name='archive'),
+    path('archive/<int:year>/', views.ArchiveView.as_view(), name='archive'),
+    path('archive/<str:category>/', views.ArchiveView.as_view(), name='archive'),
     path('archive/', views.ArchiveView.as_view(), name='archive'),
 ]
 
