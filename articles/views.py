@@ -1,29 +1,28 @@
 """
 한돈투데이 뷰
-- HomeView: 메인 페이지 (최신 기사 목록)
-- ArticleDetailView: 기사 상세
-- ArchiveView: 아카이브 (검색 + 필터링)
+- HomeView: 메인 페이지 (최신 기사 목록, 만평/웹툰 제외)
+- DetailView: 기사 상세
+- ManhwaDetailView: 만평 전용 상세
+- ArchiveView: 아카이브 (필터링, 만평/웹툰 포함)
 """
 
-import re
-import logging
-
-from django.views.generic import ListView, DetailView, CreateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import logout
 from django.urls import reverse_lazy, reverse
+from django.contrib.auth import logout
 from django.shortcuts import redirect, get_object_or_404
-from django.http import HttpResponsePermanentRedirect, HttpResponseNotFound
+from django.http import HttpResponsePermanentRedirect
 from django.db.models import Q, Count, Sum
 from django.utils import timezone
-
 from .models import Article
 
-logger = logging.getLogger(__name__)
+
+# 홈/헤더에 노출하지 않을 카테고리
+HIDDEN_CATEGORIES = ['만평', '웹툰']
 
 
 class HomeView(ListView):
-    """홈페이지"""
+    """홈페이지 — 만평/웹툰 제외"""
     model = Article
     template_name = 'articles/home.html'
     context_object_name = 'articles'
@@ -31,7 +30,10 @@ class HomeView(ListView):
 
     def get_queryset(self):
         queryset = Article.objects.filter(
-            publish_status='published'
+            publish_status='published',
+            published_at__lte=timezone.now(),
+        ).exclude(
+            category__in=HIDDEN_CATEGORIES,
         ).order_by('-published_at')
 
         category = self.request.GET.get('cat')
@@ -44,10 +46,15 @@ class HomeView(ListView):
         context = super().get_context_data(**kwargs)
 
         category = self.request.GET.get('cat')
-        nav_map = {'국내': 'domestic', '글로벌': 'global', 'market': 'market', 'policy': 'policy'}
-        context['active_nav'] = nav_map.get(category, 'home')
+        if category == '국내':
+            context['active_nav'] = 'domestic'
+        elif category == '글로벌':
+            context['active_nav'] = 'global'
+        elif category == '시황':
+            context['active_nav'] = 'market'
+        else:
+            context['active_nav'] = 'home'
 
-        # 통계 — aggregate로 쿼리 1번
         stats = Article.objects.filter(publish_status='published').aggregate(
             korea_count=Count('id', filter=Q(category='국내')),
             global_count=Count('id', filter=Q(category='글로벌')),
@@ -60,14 +67,14 @@ class HomeView(ListView):
         today = timezone.localdate()
         context['today_views'] = Article.objects.filter(
             publish_status='published',
-            published_at__date=today
+            published_at__date=today,
         ).aggregate(s=Sum('view_count'))['s'] or 0
 
         return context
 
 
 class ArticleDetailView(DetailView):
-    """기사 상세 페이지"""
+    """기사 상세 페이지 (국내/글로벌/시황)"""
     model = Article
     template_name = 'articles/detail.html'
     context_object_name = 'article'
@@ -79,91 +86,154 @@ class ArticleDetailView(DetailView):
         article = get_object_or_404(
             Article,
             id=article_id,
-            publish_status='published'
+            publish_status='published',
         )
 
-        # slug 불일치 시 redirect URL 세팅 (get()에서 처리)
         correct_slug = article.slug or 'no-slug'
         if slug != correct_slug:
-            self._redirect_url = reverse('articles:detail', kwargs={
-                'article_id': article.id,
-                'slug': correct_slug,
-            })
+            if article.category == '만평':
+                correct_url = reverse('articles:manhwa_detail', kwargs={
+                    'article_id': article.id,
+                    'slug': correct_slug,
+                })
+            else:
+                correct_url = reverse('articles:detail', kwargs={
+                    'article_id': article.id,
+                    'slug': correct_slug,
+                })
+            raise self._redirect_exception(correct_url)
 
         return article
 
+    def _redirect_exception(self, url):
+        class SlugRedirect(Exception):
+            def __init__(self, redirect_url):
+                self.redirect_url = redirect_url
+        return SlugRedirect(url)
+
     def get(self, request, *args, **kwargs):
-        """slug 불일치 시 301 redirect, 정상 시 조회수 처리 후 응답"""
-        self._redirect_url = None
-        self.object = self.get_object()
-
-        if self._redirect_url:
-            return HttpResponsePermanentRedirect(self._redirect_url)
-
-        # 세션 기반 중복 방지
-        session_key = f'viewed_article_{self.object.id}'
-        if not request.session.get(session_key):
-            self.object.view_count += 1
-            self.object.save(update_fields=['view_count'])
-            request.session[session_key] = True
-
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+        try:
+            response = super().get(request, *args, **kwargs)
+            article = self.object
+            session_key = f'viewed_article_{article.id}'
+            if not request.session.get(session_key):
+                article.view_count += 1
+                article.save(update_fields=['view_count'])
+                request.session[session_key] = True
+            return response
+        except Exception as e:
+            if hasattr(e, 'redirect_url'):
+                return HttpResponsePermanentRedirect(e.redirect_url)
+            raise
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         article = self.object
-        match = re.search(
-            r'<blockquote>.*?</blockquote>',
-            article.body_html or '',
-            re.DOTALL
-        )
+
+        import re
+        match = re.search(r'<blockquote>.*?</blockquote>', article.body_html or '', re.DOTALL)
         context['summary_html'] = match.group(0) if match else None
 
         context['related_articles'] = Article.objects.filter(
             publish_status='published',
-            category=article.category
-        ).exclude(id=article.id).order_by('-published_at')[:3]
+            category=article.category,
+        ).exclude(id=article.id).order_by('-created_at')[:3]
+
+        return context
+
+
+class ManhwaDetailView(DetailView):
+    """만평 전용 상세 페이지"""
+    model = Article
+    template_name = 'articles/manhwa_detail.html'
+    context_object_name = 'article'
+
+    def get_object(self):
+        article_id = self.kwargs.get('article_id')
+        slug = self.kwargs.get('slug')
+
+        article = get_object_or_404(
+            Article,
+            id=article_id,
+            category='만평',
+            publish_status='published',
+        )
+
+        correct_slug = article.slug or 'no-slug'
+        if slug != correct_slug:
+            correct_url = reverse('articles:manhwa_detail', kwargs={
+                'article_id': article.id,
+                'slug': correct_slug,
+            })
+            return HttpResponsePermanentRedirect(correct_url)
+
+        return article
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        article = self.object
+        session_key = f'viewed_article_{article.id}'
+        if not request.session.get(session_key):
+            article.view_count += 1
+            article.save(update_fields=['view_count'])
+            request.session[session_key] = True
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        article = self.object
+
+        # 이전/다음 만평
+        context['prev_manhwa'] = Article.objects.filter(
+            category='만평',
+            publish_status='published',
+            published_at__lt=article.published_at,
+        ).order_by('-published_at').first()
+
+        context['next_manhwa'] = Article.objects.filter(
+            category='만평',
+            publish_status='published',
+            published_at__gt=article.published_at,
+        ).order_by('published_at').first()
 
         return context
 
 
 class ArchiveView(ListView):
-    """아카이브 — 검색 + 날짜/카테고리 필터링"""
+    """아카이브 — 만평/웹툰 포함 전체 카테고리"""
     model = Article
     template_name = 'articles/archive.html'
     context_object_name = 'articles'
-    paginate_by = 20
+    paginate_by = 15
 
     def get_queryset(self):
         sort = self.request.GET.get('sort', 'latest')
-        order = '-view_count' if sort == 'popular' else '-published_at'
+        order = '-view_count' if sort == 'popular' else '-created_at'
 
         queryset = Article.objects.filter(
-            publish_status='published'
+            publish_status='published',
+            published_at__lte=timezone.now(),
         ).order_by(order)
 
-        # 카테고리: URL 경로 우선, 없으면 쿼리스트링
+        # URL path 카테고리 필터
         category = self.kwargs.get('category') or self.request.GET.get('cat')
-        if category in ['국내', '글로벌', '시황']:
+        if category in ['국내', '글로벌', '시황', '만평', '웹툰']:
             queryset = queryset.filter(category=category)
 
-        # 날짜 필터
-        year = self.kwargs.get('year')
-        if year:
-            queryset = queryset.filter(published_at__year=year)
-
-        month = self.kwargs.get('month')
-        if month:
-            queryset = queryset.filter(published_at__month=month)
-
-        # 검색어 (제목 + 부제목)
+        # 검색어
         q = self.request.GET.get('q', '').strip()
         if q:
             queryset = queryset.filter(
-                Q(title__icontains=q) | Q(deck__icontains=q)
+                Q(title__icontains=q) | Q(body_markdown__icontains=q)
             )
+
+        year = self.kwargs.get('year')
+        if year:
+            queryset = queryset.filter(created_at__year=year)
+
+        month = self.kwargs.get('month')
+        if month:
+            queryset = queryset.filter(created_at__month=month)
 
         return queryset
 
@@ -171,40 +241,34 @@ class ArchiveView(ListView):
         context = super().get_context_data(**kwargs)
 
         context['archive_sort'] = self.request.GET.get('sort', 'latest')
-        context['archive_category'] = (
-            self.kwargs.get('category') or self.request.GET.get('cat', '')
-        )
+        context['archive_category'] = self.kwargs.get('category') or self.request.GET.get('cat')
         context['archive_year'] = self.kwargs.get('year')
         context['archive_month'] = self.kwargs.get('month')
-        context['search_query'] = self.request.GET.get('q', '').strip()
+        context['search_query'] = self.request.GET.get('q', '')
 
-        # 날짜별 목록 (사이드바)
-        context['available_dates'] = Article.objects.filter(
-            publish_status='published'
-        ).dates('published_at', 'month', order='DESC')
+        dates = Article.objects.filter(
+            publish_status='published',
+        ).dates('created_at', 'month', order='DESC')
+        context['available_dates'] = dates
 
-        # 카테고리별 기사 수 — aggregate로 쿼리 1번
-        counts = Article.objects.filter(publish_status='published').aggregate(
+        # 카테고리별 카운트
+        counts = Article.objects.filter(
+            publish_status='published',
+        ).aggregate(
             total=Count('id'),
             domestic=Count('id', filter=Q(category='국내')),
             global_=Count('id', filter=Q(category='글로벌')),
             briefing=Count('id', filter=Q(category='시황')),
+            manhwa=Count('id', filter=Q(category='만평')),
+            webtoon=Count('id', filter=Q(category='웹툰')),
         )
         context['total_count'] = counts['total'] or 0
         context['domestic_count'] = counts['domestic'] or 0
         context['global_count'] = counts['global_'] or 0
         context['briefing_count'] = counts['briefing'] or 0
+        context['manhwa_count'] = counts['manhwa'] or 0
+        context['webtoon_count'] = counts['webtoon'] or 0
 
-        return context
-
-
-class AboutView(TemplateView):
-    """소개 페이지"""
-    template_name = "articles/about.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["active_nav"] = "about"
         return context
 
 
@@ -221,16 +285,21 @@ class SignupView(CreateView):
 
 
 def logout_view(request):
-    """로그아웃 — POST 전용 (Django 5.x 권장)"""
-    if request.method == 'POST':
-        logout(request)
+    logout(request)
     return redirect('articles:home')
 
 
 def honeypot_view(request):
-    """Honeypot — 봇 감지 함정 (로그 기록만, Cloud Run 캐시 미사용)"""
+    from django.core.cache import cache
+    from django.http import HttpResponseNotFound
+    import logging
+    logger = logging.getLogger(__name__)
+
     ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
     if ip:
         ip = ip.split(',')[0].strip()
+        cache_key = f'honeypot_blocked_{ip}'
+        cache.set(cache_key, True, timeout=60 * 60 * 24)
         logger.warning(f'[Honeypot] 봇 감지 IP: {ip}')
+
     return HttpResponseNotFound()
