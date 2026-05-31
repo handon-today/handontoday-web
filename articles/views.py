@@ -19,7 +19,7 @@ from .models import Article
 
 
 # 홈/헤더에 노출하지 않을 카테고리
-HIDDEN_CATEGORIES = ['만평', '웹툰']
+HIDDEN_CATEGORIES = []
 
 
 class HomeView(ListView):
