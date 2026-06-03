@@ -51,7 +51,7 @@ urlpatterns = [
         name='archive_cat'
     ),
     
-    # 아카이브 (전체)
+    # 아카이브 (전체) — name='archive' 유지 (기존 템플릿 호환)
     path('archive/', views.ArchiveView.as_view(), name='archive'),
 ]
 
