@@ -87,6 +87,34 @@
   font-style: italic;
 }
 
+/* ── 미래 만평 배너 ── */
+.future-banner {
+  background: #111;
+  border-radius: 10px 10px 0 0;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 0;
+}
+.future-banner-year {
+  font-size: 32px;
+  font-weight: 900;
+  color: #EF9F27;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.future-banner-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.6;
+}
+.future-banner + .manhwa-image-wrap {
+  border-radius: 0 0 12px 12px;
+  border-top: none;
+}
+
 /* ── 이미지 ── */
 .manhwa-image-wrap {
   width: 100%;
@@ -205,14 +233,29 @@
     </div>
   </div>
 
-  {# ── 주제 섹션 (이미지 위) ── #}
+  {# ── 주제 섹션 ── #}
   {% if article.deck %}
   <div class="manhwa-topic">
-    <p class="topic-label">이번 주 주제</p>
+    {% if article.slug and article.slug|slice:":7" == "future-" %}
+      <p class="topic-label">이번 주 주제 → 20년 후 미래 상상</p>
+    {% else %}
+      <p class="topic-label">이번 주 주제</p>
+    {% endif %}
     <p class="topic-text">{{ article.deck }}</p>
     {% if article.body_markdown %}
     <p class="topic-caption">"{{ article.body_markdown|striptags|truncatewords:15 }}"</p>
     {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── 미래 만평 배너 (slug이 future-로 시작할 때만) ── #}
+  {% if article.slug and article.slug|slice:":7" == "future-" %}
+  <div class="future-banner">
+    <div class="future-banner-year">2045</div>
+    <div class="future-banner-desc">
+      지금 이 흐름이 20년 뒤까지 이어진다면?<br>
+      한돈투데이가 상상하는 2045년 양돈 업계
+    </div>
   </div>
   {% endif %}
 
