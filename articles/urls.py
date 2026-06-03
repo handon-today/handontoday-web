@@ -65,3 +65,12 @@ urlpatterns = [
 urlpatterns += [
     path('contact-old/', views.honeypot_view, name='honeypot'),
 ]
+
+# 만평 상세
+urlpatterns += [
+    path(
+        'manhwa/<int:article_id>-<slug:slug>/',
+        views.ManhwaDetailView.as_view(),
+        name='manhwa_detail'
+    ),
+]
