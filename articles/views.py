@@ -220,6 +220,8 @@ class ArchiveView(ListView):
         context['domestic_count'] = Article.objects.filter(publish_status='published', category='국내').count()
         context['global_count'] = Article.objects.filter(publish_status='published', category='글로벌').count()
         context['briefing_count'] = Article.objects.filter(publish_status='published', category='시황').count()
+        context['manhwa_count'] = Article.objects.filter(publish_status='published', category='만평').count()
+        context['webtoon_count'] = Article.objects.filter(publish_status='published', category='웹툰').count()
         context['total_count'] = Article.objects.filter(publish_status='published').count()
         
         return context

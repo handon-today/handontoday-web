@@ -82,6 +82,12 @@
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 .filter-chip:hover:not(.active) { border-color: var(--ink); }
+.filter-chip.manhwa-chip.active {
+  border-color: #854F0B;
+  color: #854F0B;
+  background: color-mix(in srgb, #854F0B 8%, transparent);
+}
+.filter-chip.manhwa-chip:hover:not(.active) { border-color: #854F0B; color: #854F0B; }
 .filter-sep { color: var(--line); font-size: 18px; }
 .sort-select {
   margin-left: auto;
@@ -134,15 +140,19 @@
 .card-thumb--fallback { display: flex; align-items: center; justify-content: center; }
 .thumb-domestic { background: #c0392b12; border: 1px solid #c0392b22; }
 .thumb-global   { background: #1e609112; border: 1px solid #1e609122; }
+.thumb-manhwa   { background: #FAEEDA; border: 1px solid #EF9F2733; }
 .thumb-fallback-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; opacity: .4; }
 .thumb-domestic .thumb-fallback-label { color: #c0392b; }
 .thumb-global   .thumb-fallback-label { color: #1e6091; }
+.thumb-manhwa   .thumb-fallback-label { color: #854F0B; opacity: .7; }
 
 .card-body { flex: 1; min-width: 0; }
 .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
 .cat-badge { font-size: 11px; font-weight: 600; letter-spacing: .05em; }
-.cat-badge.cat-domestic { color: #c0392b; }
-.cat-badge.cat-global   { color: #2980b9; }
+.cat-badge.cat-domestic  { color: #c0392b; }
+.cat-badge.cat-global    { color: #2980b9; }
+.cat-badge.cat-briefing  { color: #27ae60; }
+.cat-badge.cat-manhwa    { color: #854F0B; }
 .meta-dot  { color: var(--muted); font-size: 11px; }
 .meta-text { font-size: 11px; color: var(--muted); }
 
@@ -168,7 +178,7 @@
   overflow: hidden;
 }
 
-/* ── 삭제 버튼 (B안 — staff only) ── */
+/* ── 삭제 버튼 (staff only) ── */
 .card-delete-row {
   width: 100%;
   display: flex;
@@ -245,6 +255,8 @@
 }
 .sidebar-item:hover { color: var(--accent); }
 .sidebar-item.active { color: var(--accent); font-weight: 600; }
+.sidebar-item.manhwa-item:hover { color: #854F0B; }
+.sidebar-item.manhwa-item.active { color: #854F0B; }
 .sidebar-count {
   font-size: 12px;
   color: var(--muted);
@@ -256,6 +268,10 @@
 .sidebar-item.active .sidebar-count {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
+}
+.sidebar-item.manhwa-item.active .sidebar-count {
+  background: color-mix(in srgb, #854F0B 15%, transparent);
+  color: #854F0B;
 }
 
 /* ── 삭제 확인 모달 ── */
@@ -372,6 +388,12 @@
 
       <span class="filter-sep">|</span>
 
+      <a href="{% url 'articles:archive' %}?cat=만평{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
+         class="filter-chip manhwa-chip {% if cat == '만평' %}active{% endif %}">만평</a>
+
+      <a href="{% url 'articles:archive' %}?cat=웹툰{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
+         class="filter-chip manhwa-chip {% if cat == '웹툰' %}active{% endif %}">웹툰</a>
+
       {% if archive_year %}
         <span class="filter-chip active">
           {{ archive_year }}년{% if archive_month %} {{ archive_month }}월{% endif %}
@@ -379,7 +401,6 @@
         </span>
       {% endif %}
 
-      {# 정렬 셀렉트 #}
       <form method="get" action="{% url 'articles:archive' %}" style="margin-left:auto; display:flex; align-items:center; gap:6px;">
         {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
         {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
@@ -415,14 +436,23 @@
           {% if article.image_url %}
             <div class="card-thumb" style="background-image:url('{{ article.image_url }}');"></div>
           {% else %}
-            <div class="card-thumb card-thumb--fallback {% if article.category == '국내' %}thumb-domestic{% else %}thumb-global{% endif %}">
+            <div class="card-thumb card-thumb--fallback
+              {% if article.category == '국내' %}thumb-domestic
+              {% elif article.category == '글로벌' %}thumb-global
+              {% elif article.category == '만평' %}thumb-manhwa
+              {% else %}thumb-global{% endif %}">
               <span class="thumb-fallback-label">{{ article.category }}</span>
             </div>
           {% endif %}
         </a>
         <div class="card-body">
           <div class="card-meta">
-            <span class="cat-badge {% if article.category == '국내' %}cat-domestic{% else %}cat-global{% endif %}">{{ article.category }}</span>
+            <span class="cat-badge
+              {% if article.category == '국내' %}cat-domestic
+              {% elif article.category == '글로벌' %}cat-global
+              {% elif article.category == '시황' %}cat-briefing
+              {% elif article.category == '만평' %}cat-manhwa
+              {% else %}cat-global{% endif %}">{{ article.category }}</span>
             <span class="meta-dot">•</span>
             <span class="meta-text">{{ article.published_at|date:"Y.m.d" }}</span>
             <span class="meta-dot">•</span>
@@ -479,24 +509,30 @@
       <div class="sidebar-title">카테고리</div>
       <a href="{% url 'articles:archive' %}{% if q %}?q={{ q }}{% endif %}"
          class="sidebar-item {% if not cat %}active{% endif %}">
-        전체
-        <span class="sidebar-count">{{ total_count|intcomma }}</span>
+        전체 <span class="sidebar-count">{{ total_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=국내{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '국내' %}active{% endif %}">
-        국내
-        <span class="sidebar-count">{{ domestic_count|intcomma }}</span>
+        국내 <span class="sidebar-count">{{ domestic_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=글로벌{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '글로벌' %}active{% endif %}">
-        글로벌
-        <span class="sidebar-count">{{ global_count|intcomma }}</span>
+        글로벌 <span class="sidebar-count">{{ global_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=시황{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '시황' %}active{% endif %}">
-        시황
-        <span class="sidebar-count">{{ briefing_count|intcomma }}</span>
+        시황 <span class="sidebar-count">{{ briefing_count|intcomma }}</span>
       </a>
+      <a href="{% url 'articles:archive' %}?cat=만평{% if q %}&q={{ q }}{% endif %}"
+         class="sidebar-item manhwa-item {% if cat == '만평' %}active{% endif %}">
+        만평 <span class="sidebar-count">{{ manhwa_count|intcomma }}</span>
+      </a>
+      {% if webtoon_count > 0 %}
+      <a href="{% url 'articles:archive' %}?cat=웹툰{% if q %}&q={{ q }}{% endif %}"
+         class="sidebar-item manhwa-item {% if cat == '웹툰' %}active{% endif %}">
+        웹툰 <span class="sidebar-count">{{ webtoon_count|intcomma }}</span>
+      </a>
+      {% endif %}
     </div>
 
     <div class="sidebar-section">
@@ -552,12 +588,10 @@
     pendingId = null;
   };
 
-  // 모달 바깥 클릭 시 닫기
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) closeDeleteModal();
   });
 
-  // 삭제 확인 버튼
   confirmBtn.addEventListener('click', function() {
     if (!pendingId) return;
     confirmBtn.disabled = true;
@@ -573,7 +607,6 @@
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data.ok) {
-        // 카드를 DOM에서 제거
         var card = document.getElementById('card-' + pendingId);
         if (card) {
           card.style.transition = 'opacity 0.3s';
@@ -594,7 +627,6 @@
     });
   });
 
-  // CSRF 토큰 추출
   function getCookie(name) {
     var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
     return v ? v[2] : null;
