@@ -82,12 +82,6 @@
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 .filter-chip:hover:not(.active) { border-color: var(--ink); }
-.filter-chip.manhwa-chip.active {
-  border-color: #854F0B;
-  color: #854F0B;
-  background: color-mix(in srgb, #854F0B 8%, transparent);
-}
-.filter-chip.manhwa-chip:hover:not(.active) { border-color: #854F0B; color: #854F0B; }
 .filter-sep { color: var(--line); font-size: 18px; }
 .sort-select {
   margin-left: auto;
@@ -127,6 +121,7 @@
   gap: 16px;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
 }
 .card-thumb-link { flex-shrink: 0; display: block; width: 110px; height: 74px; }
 .card-thumb {
@@ -139,19 +134,15 @@
 .card-thumb--fallback { display: flex; align-items: center; justify-content: center; }
 .thumb-domestic { background: #c0392b12; border: 1px solid #c0392b22; }
 .thumb-global   { background: #1e609112; border: 1px solid #1e609122; }
-.thumb-manhwa   { background: #FAEEDA; border: 1px solid #EF9F2733; }
 .thumb-fallback-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; opacity: .4; }
 .thumb-domestic .thumb-fallback-label { color: #c0392b; }
 .thumb-global   .thumb-fallback-label { color: #1e6091; }
-.thumb-manhwa   .thumb-fallback-label { color: #854F0B; opacity: .7; }
 
 .card-body { flex: 1; min-width: 0; }
 .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
 .cat-badge { font-size: 11px; font-weight: 600; letter-spacing: .05em; }
-.cat-badge.cat-domestic  { color: #c0392b; }
-.cat-badge.cat-global    { color: #2980b9; }
-.cat-badge.cat-briefing  { color: #27ae60; }
-.cat-badge.cat-manhwa    { color: #854F0B; }
+.cat-badge.cat-domestic { color: #c0392b; }
+.cat-badge.cat-global   { color: #2980b9; }
 .meta-dot  { color: var(--muted); font-size: 11px; }
 .meta-text { font-size: 11px; color: var(--muted); }
 
@@ -175,6 +166,31 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── 삭제 버튼 (B안 — staff only) ── */
+.card-delete-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+.btn-card-delete {
+  background: transparent;
+  border: 1.5px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  line-height: 1.5;
+}
+.btn-card-delete:hover {
+  border-color: #e55;
+  color: #e55;
+  background: #fff5f5;
 }
 
 /* ── 빈 결과 ── */
@@ -229,8 +245,6 @@
 }
 .sidebar-item:hover { color: var(--accent); }
 .sidebar-item.active { color: var(--accent); font-weight: 600; }
-.sidebar-item.manhwa-item:hover { color: #854F0B; }
-.sidebar-item.manhwa-item.active { color: #854F0B; }
 .sidebar-count {
   font-size: 12px;
   color: var(--muted);
@@ -243,10 +257,67 @@
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
 }
-.sidebar-item.manhwa-item.active .sidebar-count {
-  background: color-mix(in srgb, #854F0B 15%, transparent);
-  color: #854F0B;
+
+/* ── 삭제 확인 모달 ── */
+.delete-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
+.delete-modal-overlay.active { display: flex; }
+.delete-modal-box {
+  background: var(--bg, #fff);
+  border: 2px solid var(--ink, #1a1a1a);
+  border-radius: 6px;
+  padding: 32px 36px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 4px 4px 0 var(--ink, #1a1a1a);
+}
+.delete-modal-icon { font-size: 32px; margin-bottom: 12px; }
+.delete-modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.delete-modal-desc {
+  font-size: 13px;
+  color: var(--muted, #888);
+  margin-bottom: 24px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.delete-modal-desc strong { color: var(--ink, #1a1a1a); display: block; margin-bottom: 6px; }
+.delete-modal-actions { display: flex; gap: 10px; justify-content: center; }
+.btn-modal-cancel {
+  background: var(--bg, #f0f0f0);
+  color: var(--ink, #1a1a1a);
+  border: 1.5px solid var(--line, #ccc);
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: opacity .15s;
+}
+.btn-modal-cancel:hover { opacity: .7; }
+.btn-modal-confirm {
+  background: #e55;
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: background .15s;
+}
+.btn-modal-confirm:hover { background: #c00; }
+.btn-modal-confirm:disabled { background: #aaa; cursor: not-allowed; }
 
 @media (max-width: 600px) {
   .card-thumb-link { width: 84px; height: 56px; }
@@ -255,6 +326,7 @@
   .card-deck { display: none; }
   .filter-toolbar { gap: 8px; }
   .sort-select { margin-left: 0; width: 100%; }
+  .delete-modal-box { padding: 24px 20px; }
 }
 </style>
 {% endblock %}
@@ -300,12 +372,6 @@
 
       <span class="filter-sep">|</span>
 
-      <a href="{% url 'articles:archive' %}?cat=만평{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
-         class="filter-chip manhwa-chip {% if cat == '만평' %}active{% endif %}">만평</a>
-
-      <a href="{% url 'articles:archive' %}?cat=웹툰{% if q %}&q={{ q }}{% endif %}{% if sort and sort != 'latest' %}&sort={{ sort }}{% endif %}"
-         class="filter-chip manhwa-chip {% if cat == '웹툰' %}active{% endif %}">웹툰</a>
-
       {% if archive_year %}
         <span class="filter-chip active">
           {{ archive_year }}년{% if archive_month %} {{ archive_month }}월{% endif %}
@@ -313,6 +379,7 @@
         </span>
       {% endif %}
 
+      {# 정렬 셀렉트 #}
       <form method="get" action="{% url 'articles:archive' %}" style="margin-left:auto; display:flex; align-items:center; gap:6px;">
         {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
         {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
@@ -343,28 +410,19 @@
     <div class="articles-list">
       {% for article in articles %}
       {% with article_url=article.get_absolute_url %}
-      <article class="article-card">
+      <article class="article-card" id="card-{{ article.id }}">
         <a href="{{ article_url }}" class="card-thumb-link" tabindex="-1" aria-hidden="true">
           {% if article.image_url %}
             <div class="card-thumb" style="background-image:url('{{ article.image_url }}');"></div>
           {% else %}
-            <div class="card-thumb card-thumb--fallback
-              {% if article.category == '국내' %}thumb-domestic
-              {% elif article.category == '글로벌' %}thumb-global
-              {% elif article.category == '만평' %}thumb-manhwa
-              {% else %}thumb-global{% endif %}">
+            <div class="card-thumb card-thumb--fallback {% if article.category == '국내' %}thumb-domestic{% else %}thumb-global{% endif %}">
               <span class="thumb-fallback-label">{{ article.category }}</span>
             </div>
           {% endif %}
         </a>
         <div class="card-body">
           <div class="card-meta">
-            <span class="cat-badge
-              {% if article.category == '국내' %}cat-domestic
-              {% elif article.category == '글로벌' %}cat-global
-              {% elif article.category == '시황' %}cat-briefing
-              {% elif article.category == '만평' %}cat-manhwa
-              {% else %}cat-global{% endif %}">{{ article.category }}</span>
+            <span class="cat-badge {% if article.category == '국내' %}cat-domestic{% else %}cat-global{% endif %}">{{ article.category }}</span>
             <span class="meta-dot">•</span>
             <span class="meta-text">{{ article.published_at|date:"Y.m.d" }}</span>
             <span class="meta-dot">•</span>
@@ -375,6 +433,17 @@
           </h2>
           <p class="card-deck">{{ article.deck|default:article.display_body|striptags|truncatewords:18 }}</p>
         </div>
+
+        {# ── 삭제 버튼 — staff 로그인 시에만 노출 ── #}
+        {% if request.user.is_staff %}
+        <div class="card-delete-row">
+          <button
+            class="btn-card-delete"
+            onclick="openDeleteModal({{ article.id }}, '{{ article.title|striptags|truncatechars:40|escapejs }}')"
+          >🗑 삭제</button>
+        </div>
+        {% endif %}
+
       </article>
       {% endwith %}
       {% empty %}
@@ -410,39 +479,35 @@
       <div class="sidebar-title">카테고리</div>
       <a href="{% url 'articles:archive' %}{% if q %}?q={{ q }}{% endif %}"
          class="sidebar-item {% if not cat %}active{% endif %}">
-        전체 <span class="sidebar-count">{{ total_count|intcomma }}</span>
+        전체
+        <span class="sidebar-count">{{ total_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=국내{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '국내' %}active{% endif %}">
-        국내 <span class="sidebar-count">{{ domestic_count|intcomma }}</span>
+        국내
+        <span class="sidebar-count">{{ domestic_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=글로벌{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '글로벌' %}active{% endif %}">
-        글로벌 <span class="sidebar-count">{{ global_count|intcomma }}</span>
+        글로벌
+        <span class="sidebar-count">{{ global_count|intcomma }}</span>
       </a>
       <a href="{% url 'articles:archive' %}?cat=시황{% if q %}&q={{ q }}{% endif %}"
          class="sidebar-item {% if cat == '시황' %}active{% endif %}">
-        시황 <span class="sidebar-count">{{ briefing_count|intcomma }}</span>
+        시황
+        <span class="sidebar-count">{{ briefing_count|intcomma }}</span>
       </a>
-      <a href="{% url 'articles:archive' %}?cat=만평{% if q %}&q={{ q }}{% endif %}"
-         class="sidebar-item manhwa-item {% if cat == '만평' %}active{% endif %}">
-        만평 <span class="sidebar-count">{{ manhwa_count|intcomma }}</span>
-      </a>
-      {% if webtoon_count > 0 %}
-      <a href="{% url 'articles:archive' %}?cat=웹툰{% if q %}&q={{ q }}{% endif %}"
-         class="sidebar-item manhwa-item {% if cat == '웹툰' %}active{% endif %}">
-        웹툰 <span class="sidebar-count">{{ webtoon_count|intcomma }}</span>
-      </a>
-      {% endif %}
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-title">날짜별</div>
       {% for date in available_dates %}
-      <a href="{% url 'articles:archive' date.year date.month %}"
+      <a href="{% url 'articles:archive_ym' date.year date.month %}{% if cat %}?cat={{ cat }}{% endif %}"
          class="sidebar-item {% if archive_year == date.year and archive_month == date.month %}active{% endif %}">
         {{ date|date:"Y년 n월" }}
       </a>
+      {% empty %}
+      <p style="font-size:13px; color:var(--muted);">날짜 정보 없음</p>
       {% endfor %}
     </div>
 
@@ -451,4 +516,91 @@
 </div>
 
 {% endwith %}
+
+{# ── 삭제 확인 모달 (staff 로그인 시에만 렌더) ── #}
+{% if request.user.is_staff %}
+<div class="delete-modal-overlay" id="deleteModal">
+  <div class="delete-modal-box">
+    <div class="delete-modal-icon">🗑️</div>
+    <div class="delete-modal-title">기사를 삭제할까요?</div>
+    <div class="delete-modal-desc">
+      <strong id="deleteModalTitle"></strong>
+      삭제하면 복구할 수 없습니다.
+    </div>
+    <div class="delete-modal-actions">
+      <button class="btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
+      <button class="btn-modal-confirm" id="deleteModalConfirm">삭제 확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var pendingId = null;
+  var overlay = document.getElementById('deleteModal');
+  var titleEl = document.getElementById('deleteModalTitle');
+  var confirmBtn = document.getElementById('deleteModalConfirm');
+
+  window.openDeleteModal = function(articleId, articleTitle) {
+    pendingId = articleId;
+    titleEl.textContent = articleTitle;
+    overlay.classList.add('active');
+  };
+
+  window.closeDeleteModal = function() {
+    overlay.classList.remove('active');
+    pendingId = null;
+  };
+
+  // 모달 바깥 클릭 시 닫기
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeDeleteModal();
+  });
+
+  // 삭제 확인 버튼
+  confirmBtn.addEventListener('click', function() {
+    if (!pendingId) return;
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = '삭제 중...';
+
+    fetch('/article/' + pendingId + '/delete/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        // 카드를 DOM에서 제거
+        var card = document.getElementById('card-' + pendingId);
+        if (card) {
+          card.style.transition = 'opacity 0.3s';
+          card.style.opacity = '0';
+          setTimeout(function() { card.remove(); }, 300);
+        }
+        closeDeleteModal();
+      } else {
+        alert('삭제 실패: ' + (data.message || '알 수 없는 오류'));
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '삭제 확인';
+      }
+    })
+    .catch(function() {
+      alert('네트워크 오류가 발생했습니다.');
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = '삭제 확인';
+    });
+  });
+
+  // CSRF 토큰 추출
+  function getCookie(name) {
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+  }
+})();
+</script>
+{% endif %}
+
 {% endblock %}

@@ -15,28 +15,43 @@ urlpatterns = [
 
     # 메인 페이지
     path('', views.HomeView.as_view(), name='home'),
-
-    # 소개 페이지
-    path('about/', views.AboutView.as_view(), name='about'),
-
-    # 기사 상세 (국내/글로벌/시황)
+    
+    # 기사 상세 (id + slug)
     path(
         'article/<int:article_id>-<slug:slug>/',
         views.ArticleDetailView.as_view(),
         name='detail'
     ),
 
-    # 만평 상세
+    # 기사 삭제 (staff only, POST)
     path(
-        'manhwa/<int:article_id>-<slug:slug>/',
-        views.ManhwaDetailView.as_view(),
-        name='manhwa_detail'
+        'article/<int:article_id>/delete/',
+        views.article_delete,
+        name='article_delete'
     ),
-
-    # 아카이브 — name을 모두 'archive'로 통일 (템플릿과 일치)
-    path('archive/<int:year>/<int:month>/', views.ArchiveView.as_view(), name='archive'),
-    path('archive/<int:year>/', views.ArchiveView.as_view(), name='archive'),
-    path('archive/<str:category>/', views.ArchiveView.as_view(), name='archive'),
+    
+    # 아카이브 (년도+월)
+    path(
+        'archive/<int:year>/<int:month>/',
+        views.ArchiveView.as_view(),
+        name='archive_ym'
+    ),
+    
+    # 아카이브 (년도별)
+    path(
+        'archive/<int:year>/',
+        views.ArchiveView.as_view(),
+        name='archive_y'
+    ),
+    
+    # 아카이브 (카테고리별)
+    path(
+        'archive/<str:category>/',
+        views.ArchiveView.as_view(),
+        name='archive_cat'
+    ),
+    
+    # 아카이브 (전체)
     path('archive/', views.ArchiveView.as_view(), name='archive'),
 ]
 
