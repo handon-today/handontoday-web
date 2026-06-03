@@ -280,3 +280,18 @@ def honeypot_view(request):
         logger.warning(f'[Honeypot] 봇 감지 IP: {ip}')
 
     return HttpResponseNotFound()
+
+
+def about_view(request):
+    """소개 페이지"""
+    from django.shortcuts import render
+    return render(request, 'articles/about.html')
+
+
+def search_view(request):
+    """검색 — 아카이브로 리다이렉트 (q 파라미터 유지)"""
+    q = request.GET.get('q', '')
+    url = reverse('articles:archive')
+    if q:
+        url += f'?q={q}'
+    return redirect(url)

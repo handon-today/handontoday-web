@@ -15,7 +15,7 @@ urlpatterns = [
 
     # 메인 페이지
     path('', views.HomeView.as_view(), name='home'),
-    
+
     # 기사 상세 (id + slug)
     path(
         'article/<int:article_id>-<slug:slug>/',
@@ -29,30 +29,36 @@ urlpatterns = [
         views.article_delete,
         name='article_delete'
     ),
-    
+
     # 아카이브 (년도+월)
     path(
         'archive/<int:year>/<int:month>/',
         views.ArchiveView.as_view(),
         name='archive_ym'
     ),
-    
+
     # 아카이브 (년도별)
     path(
         'archive/<int:year>/',
         views.ArchiveView.as_view(),
         name='archive_y'
     ),
-    
+
     # 아카이브 (카테고리별)
     path(
         'archive/<str:category>/',
         views.ArchiveView.as_view(),
         name='archive_cat'
     ),
-    
+
     # 아카이브 (전체) — name='archive' 유지 (기존 템플릿 호환)
     path('archive/', views.ArchiveView.as_view(), name='archive'),
+
+    # 소개 페이지
+    path('about/', views.about_view, name='about'),
+
+    # 검색 — 아카이브로 리다이렉트
+    path('search/', views.search_view, name='search'),
 ]
 
 # Honeypot
