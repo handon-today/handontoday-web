@@ -27,6 +27,8 @@
   {% if article.category == '국내' %}
   <a href="{% url 'articles:home' %}?cat=국내">국내</a>
   {% elif article.category == '글로벌' %}
+  {% elif article.category == '회고' %}
+  <a href="{% url 'articles:home' %}?cat=회고">회고</a>
   <a href="{% url 'articles:home' %}?cat=글로벌">글로벌</a>
   {% endif %}
   <span class="sep">/</span>
@@ -40,6 +42,8 @@
       <span class="cat-pill domestic">국내</span>
       {% elif article.category == '글로벌' %}
       <span class="cat-pill global">🌍 글로벌</span>
+      {% elif article.category == '회고' %}
+      <span class="cat-pill review">🕐 회고</span>
       {% endif %}
       {% if article.is_hot %}
       <span class="live-dot">HOT</span>
@@ -124,6 +128,8 @@
             <span class="cat-pill domestic">국내</span>
             {% elif rel.category == '글로벌' %}
             <span class="cat-pill global">글로벌</span>
+      {% elif article.category == '회고' %}
+      <span class="cat-pill review">🕐 회고</span>
             {% endif %}
             <span class="related-date">{{ rel.published_at|date:"m.d" }}</span>
           </div>
